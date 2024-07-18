@@ -1,12 +1,6 @@
 const mongoose = require('mongoose');
-const { last } = require('rxjs');
-
-const userSchema = new mongoose.Schema({
-    first_name: {
-        type: String,
-        required: true,
-    },
-    last_name: {
+const DistributorSchema = new mongoose.Schema({
+    name : {
         type: String,
         required: true,
     },
@@ -19,22 +13,27 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    confirm_password: {
+    phoneNumber: {
         type: String,
         required: true,
     },
-    phoneNumber: {
-        type: String,
-        required: false,
-    },
     address: {
         type: String,
-        required: false,
+        required: true,
+    },
+    CUI: {
+        type: String,
+        required: true,
+        unique: true,
+    },
+    isDistributor: {
+        type: Boolean,
+        default: true,
     }
+    
 
     }, {timestamps: true});
 
+const Distributor = mongoose.model('Distributor', DistributorSchema);
 
-const User = mongoose.model('User', userSchema);
-
-module.exports = User;
+module.exports = Distributor;

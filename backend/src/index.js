@@ -1,15 +1,32 @@
 const express = require('express');
 const database = require('./config/database'); 
 const eventRoutes = require('./routes/eventRoutes');
-const authRoute = require('./routes/auth');
+const authUserRoute = require('./routes/auth/user/authUser');
+const authAdminRoute = require('./routes/auth/admin/authAdmin');
+const authDistributorRoute = require('./routes/auth/distributor/authDistributor');
+const userRoutes = require('./routes/user');
+const adminRoutes = require('./routes/admin');
+const productRoutes = require('./routes/product');
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 const app = express();
 app.use(express.json());
+//Authentication
+app.use("/api/authUser", authUserRoute); 
+app.use("/api/authAdmin", authAdminRoute);
+app.use("/api/authDistributor", authDistributorRoute);
 
-app.use("/api/auth", authRoute); 
+
 app.use("/api/events", eventRoutes); 
+app.use("/api/users", userRoutes);
+app.use("/api/admin", adminRoutes);
 
-const port = 3001;
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+app.use("/api/products",productRoutes);
+
+
+
+app.listen(process.env.PORT, () => {
+  console.log(`Server is running on port ${process.env.PORT}`);
 });
