@@ -11,8 +11,7 @@ router.put("/:id",verifyTokenAndAdmin, async (req,res)=>
         req.body.password = CryptoJS.AES.encrypt(req.body.password, process.env.PASS_SECRET).toString();
     }
     try{
-        console.log(req.body);
-        console.log(req.params.id);
+        
         const updatedUser = await User.findByIdAndUpdate(req.params.id, {
             $set: req.body,
         },{new:true});
