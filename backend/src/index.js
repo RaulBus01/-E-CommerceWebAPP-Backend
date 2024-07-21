@@ -7,6 +7,7 @@ const authDistributorRoute = require('./routes/auth/distributor/authDistributor'
 const userRoutes = require('./routes/user');
 const adminRoutes = require('./routes/admin');
 const productRoutes = require('./routes/product');
+const favouritesRoutes = require('./routes/favourites');
 const dotenv = require('dotenv');
 
 dotenv.config();
@@ -24,6 +25,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/admin", adminRoutes);
 
 app.use("/api/products",productRoutes);
+app.use("/api/favourites",favouritesRoutes);
 
 
 
