@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const { last } = require('rxjs');
 
 const userSchema = new mongoose.Schema({
     first_name: {
@@ -30,6 +29,10 @@ const userSchema = new mongoose.Schema({
     address: {
         type: String,
         required: false,
+    },
+    isVerified: {
+        type: Boolean,
+        default: false,
     }
 
     }, {timestamps: true});

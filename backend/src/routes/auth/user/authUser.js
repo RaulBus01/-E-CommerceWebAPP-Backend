@@ -2,6 +2,9 @@ const router = require('express').Router();
 const User = require('../../../models/User');
 const CryptoJS = require('crypto-js');
 const jwt = require('jsonwebtoken');
+const UserVerificationToken = require('../../../models/UserVerificationToken');
+const crypto = require('crypto');
+const { verifyEmail } = require('../../../controllers/emailController');
 
 
 //Register User
@@ -25,7 +28,19 @@ router.post('/register', async (req, res) => {
         }
         
         const user = await newUser.save();
-        res.status(200).json(user);
+        //res.status(200).json(user);
+        //generate verfication token for new user
+        const verificationToken = new UserVerificationToken({
+            userId: user._id,
+            token: crypto.randomBytes(16).toString('hex')
+        });
+        const savedVerificationToken = await verificationToken.save();
+        console.log(savedVerificationToken);
+        //send activation email
+        const link = `http://localhost:3001/api/users/confirmAccount/${savedVerificationToken.token}`;
+        await verifyEmail(user.email, link);
+        res.status(200).send({
+            message: "check email"});
     } catch (err) {
         res.status(500).json(err);
     }
