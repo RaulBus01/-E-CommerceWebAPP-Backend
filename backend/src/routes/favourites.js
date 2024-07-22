@@ -3,19 +3,19 @@ const router = require('express').Router();
 const favouritesController = require('../controllers/favouritesController');
 
 //CREATE
-router.post("/add", verifyToken, favouritesController.createFavourites);
+router.post("/add/:id", verifyTokenAndAuthorization, favouritesController.createFavourites);
 
-//UPDATE
-router.patch("/edit/:id", verifyTokenAndAuthorization, favouritesController.updateFavourites);
+//ADD
+router.put("/edit/:id", verifyTokenAndAuthorization, favouritesController.addFavourites);
 
 //DELETE PRODUCT FROM FAVOURITES
-router.delete("/deleteProduct/:userId/:productId", verifyTokenAndAuthorization, favouritesController.deleteProductFromFavourites);
+router.delete("/deleteProduct/:id/:productId", verifyTokenAndAuthorization, favouritesController.deleteProductFromFavourites);
 
 //DELETE FAVOURITES LIST
-router.delete("/delete/:userId", verifyTokenAndAuthorization, favouritesController.deleteFavourites);
+router.delete("/delete/:id", verifyTokenAndAuthorization, favouritesController.deleteAllFavourites);
 
 //GET FAVOURITES BY USER ID
-router.get("/find/:userId", verifyTokenAndAuthorization, favouritesController.getFavourites);
+router.get("/find/:id", verifyTokenAndAuthorization, favouritesController.getFavourites);
 
 //GET ALL FAVOURITES
 router.get("/findAll", verifyTokenAndAdmin, favouritesController.getAllFavourites);

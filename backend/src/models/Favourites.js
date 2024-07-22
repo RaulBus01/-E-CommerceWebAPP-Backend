@@ -7,19 +7,7 @@ const FavouritesSchema = new mongoose.Schema({
     unique: true,
   },
   products: {
-    productId: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    quantity: {
-      type: Number,
-      required: true,
-    },
-    price: {
-      type: Number,
-      required: true,
-    },
+    type: Array,
   },
 });
 
