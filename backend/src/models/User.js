@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { last } = require('rxjs');
+//const { last } = require('rxjs');
 
 const userSchema = new mongoose.Schema({
     first_name: {
