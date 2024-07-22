@@ -7,6 +7,7 @@ const authDistributorRoute = require('./routes/auth/distributor/authDistributor'
 const userRoutes = require('./routes/user');
 const adminRoutes = require('./routes/admin');
 const productRoutes = require('./routes/product');
+const orderRoutes = require('./routes/order');
 const cartRoutes = require('./routes/cart');
 const voucherRoutes = require('./routes/voucher');
 const dotenv = require('dotenv');
@@ -25,10 +26,9 @@ app.use("/api/events", eventRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/admin", adminRoutes);
 
-app.use("/api/products",productRoutes);
+app.use("/api/products", productRoutes);
 app.use("/api/cart",cartRoutes);
-app.use("/api/voucher",voucherRoutes);
-
+app.use("/api/voucher",voucherRoutes);app.use("/api/orders", orderRoutes);
 
 app.listen(process.env.PORT, () => {
   console.log(`Server is running on port ${process.env.PORT}`);

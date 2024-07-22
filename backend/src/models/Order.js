@@ -7,7 +7,7 @@ const OrderSchema= new mongoose.Schema({
         required: true,
     },
     products: {
-        
+        type: Array,
             productId: {
                 type: String,
                 required: true,
@@ -30,10 +30,8 @@ const OrderSchema= new mongoose.Schema({
         required: true,
     },
     
-        
-    
-});
+}, {timestamps: true});
 
-const Cart = mongoose.model('Cart', OrderSchema);
-module.exports = Cart;
+const Order = mongoose.model('Order', OrderSchema);
+module.exports = Order;
     

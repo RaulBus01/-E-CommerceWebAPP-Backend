@@ -24,7 +24,6 @@ const verifyTokenAndAuthorization = (req, res, next) => {
         
         if (req.user.id === req.params.id)
         {
-            
             next();
         } else
         {
@@ -65,5 +64,14 @@ const verifyTokenAndDeleteProductAuthorization = (req, res, next) => {
         }
     });
 }
-module.exports = {verifyToken, verifyTokenAndAuthorization,verifyTokenAndAdmin,verifyTokenAndDistributor,verifyTokenAndDeleteProductAuthorization};
+const verifyTokenAndDeleteOrderAuthorization = (req, res, next) => {
+    verifyToken(req, res, () => {
+        if (req.user.id || req.user.isDistributor) {
+            next();
+        } else {
+            res.status(403).json("You are not allowed to delete orders");
+        }
+    });
+};
+module.exports = {verifyToken, verifyTokenAndAuthorization,verifyTokenAndAdmin,verifyTokenAndDistributor,verifyTokenAndDeleteProductAuthorization,verifyTokenAndDeleteOrderAuthorization};
 
