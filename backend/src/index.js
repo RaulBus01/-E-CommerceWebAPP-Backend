@@ -8,6 +8,7 @@ const userRoutes = require('./routes/user');
 const adminRoutes = require('./routes/admin');
 const productRoutes = require('./routes/product');
 const cartRoutes = require('./routes/cart');
+const voucherRoutes = require('./routes/voucher');
 const dotenv = require('dotenv');
 
 dotenv.config();
@@ -26,7 +27,7 @@ app.use("/api/admin", adminRoutes);
 
 app.use("/api/products",productRoutes);
 app.use("/api/cart",cartRoutes);
-
+app.use("/api/voucher",voucherRoutes);
 
 
 app.listen(process.env.PORT, () => {

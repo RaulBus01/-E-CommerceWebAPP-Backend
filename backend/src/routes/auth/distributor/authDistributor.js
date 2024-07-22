@@ -16,6 +16,11 @@ router.post('/register', async (req, res) => {
         CUI: req.body.CUI,
     });
     try {
+        const checkDistributor = await Distributor.findOne({email: req.body.email,});
+        if (checkDistributor) {
+            res.status(404).json("Distributor already exists");
+            return;
+        }
         if(req.body.password.length < 6){
             res.status(400).json("Password must be at least 6 characters long");
             return;

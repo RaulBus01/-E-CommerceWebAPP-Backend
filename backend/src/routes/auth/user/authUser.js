@@ -15,6 +15,11 @@ router.post('/register', async (req, res) => {
         confirm_password: CryptoJS.AES.encrypt(req.body.confirm_password, process.env.PASS_SECRET).toString(),
     });
     try {
+        const checkUser = await User.findOne({email: req.body.email,});
+        if (checkUser) {
+            res.status(404).json("User already exists");
+            return;
+        }
         if(req.body.password !== req.body.confirm_password){
             res.status(400).json("Passwords do not match");
             return;

@@ -14,6 +14,11 @@ router.post('/register', async (req, res) => {
 
     });
     try {
+        const checkAdmin = await Admin.findOne({email: req.body.email,});
+        if (checkAdmin) {
+            res.status(404).json("Admin already exists");
+            return;
+        }
         if(req.body.password.length < 6){
             res.status(400).json("Password must be at least 6 characters long");
             return;
