@@ -1,7 +1,7 @@
 const Favourites = require("../models/Favourites");
 
 exports.createFavourites = async (req, res) => {
-  const newFavourites = new Favourites(req.body);
+  const newFavourites = new Favourites({products:[], userId: req.params.id });
   try {
     const savedFavourites = await newFavourites.save();
     res.status(200).json(savedFavourites);
@@ -10,21 +10,29 @@ exports.createFavourites = async (req, res) => {
   }
 };
 
-exports.updateFavourites = async (req, res) => {
+exports.addFavourites = async (req, res) => {
   try {
-    // const favourites = await Favourites.findById(req.params.id);
-    // if (favourites.products.includes(req.body.productId)) {
-    //     res.status(400).json("Product already exists in the favourites list");
-    //     return;
-    // }
-    const updatedFavourites = await Favourites.findByIdAndUpdate(
-      req.params.id,
-      {
-        $addToSet: { products: req.body.productId },
-      },
-      { new: true }
+
+    const favourites = await Favourites.findOne(
+      { userId: req.params.id },  
     );
-    res.status(200).json(updatedFavourites);
+    console.log(favourites);
+    if(!favourites || favourites === null){
+      res.status(404).json("Favourites list not found");
+      return;
+    }
+    const product = await favourites.products.find((product) => product === req.body.productId);
+    if(product){
+      res.status(400).json("Product already in favourites");
+      return;
+    }
+    const updatedFavourites = await Favourites.findByIdAndUpdate(
+      favourites._id,
+      { $push: { products: req.body.productId } },
+      { new : true }
+    );
+    const savedFavourites = await updatedFavourites.save();
+    res.status(200).json(savedFavourites);
   } catch (err) {
     res.status(500).json(err);
   }
@@ -46,7 +54,7 @@ exports.deleteProductFromFavourites = async (req, res) => {
   }
 };
 
-exports.deleteFavourites = async (req, res) => {
+exports.deleteAllFavourites = async (req, res) => {
   try {
     const favourites = await Favourites.findOne({ user: req.params.userId });
 
@@ -56,8 +64,7 @@ exports.deleteFavourites = async (req, res) => {
     }
 
     await Favourites.updateOne(
-      { user: req.params.userId },
-      { $set: { items: [] } }
+      { $set: { products: [] } }
     );
     res.status(200).json("Favourites list items have been deleted");
   } catch (err) {
@@ -69,13 +76,13 @@ exports.getFavourites = async (req, res) => {
   try {
     const favourites = await Favourites.findOne({
       user: req.params.userId,
-    }).populate("products");
+    });
 
     if (!favourites) {
       res.status(404).json("Favourites list not found");
       return;
     }
-    res.json(favourites);
+    res.json(favourites.products);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -83,7 +90,7 @@ exports.getFavourites = async (req, res) => {
 
 exports.getAllFavourites = async (req, res) => {
   try {
-    const favourites = await Favourites.find().populate("user products");
+    const favourites = await Favourites.find()
     res.json(favourites);
   } catch (err) {
     res.status(500).json({ message: err.message });
