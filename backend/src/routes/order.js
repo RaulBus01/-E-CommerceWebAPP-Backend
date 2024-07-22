@@ -1,11 +1,11 @@
-const { verifyToken,verifyTokenAndDeleteOrderAuthorization, verifyTokenAndAdmin, verifyTokenAndAuthorization, verifyTokenAndDistributor } = require('../middleware/verifyToken');
+const { verifyToken,verifyTokenAndCancelOrderAuthorization, verifyTokenAndAdmin, verifyTokenAndAuthorization, verifyTokenAndDistributor } = require('../middleware/verifyToken');
 const orderController = require('../controllers/orderController');
 const router = require('express').Router();
 
 //CREATE ORDER(USER)
 router.post("/createOrder", verifyToken, orderController.createOrder);
 //DELETE ORDER(USER, DISTRIBUTOR)
-router.delete("/deleteOrder/:id", verifyTokenAndDeleteOrderAuthorization, orderController.cancelOrder);
+router.patch("/cancelOrder/:id", verifyTokenAndCancelOrderAuthorization, orderController.cancelOrder);
 //GET ORDER BY ID(USER)
 router.get("/order/:id", verifyToken, orderController.getOrder);
 //GET ALL ORDERS(ADMIN)

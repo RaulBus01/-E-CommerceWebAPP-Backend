@@ -64,7 +64,7 @@ const verifyTokenAndDeleteProductAuthorization = (req, res, next) => {
         }
     });
 }
-const verifyTokenAndDeleteOrderAuthorization = (req, res, next) => {
+const verifyTokenAndCancelOrderAuthorization = (req, res, next) => {
     verifyToken(req, res, () => {
         if (req.user.id || req.user.isDistributor) {
             next();
@@ -73,5 +73,5 @@ const verifyTokenAndDeleteOrderAuthorization = (req, res, next) => {
         }
     });
 };
-module.exports = {verifyToken, verifyTokenAndAuthorization,verifyTokenAndAdmin,verifyTokenAndDistributor,verifyTokenAndDeleteProductAuthorization,verifyTokenAndDeleteOrderAuthorization};
+module.exports = {verifyToken, verifyTokenAndAuthorization,verifyTokenAndAdmin,verifyTokenAndDistributor,verifyTokenAndDeleteProductAuthorization,verifyTokenAndCancelOrderAuthorization};
 

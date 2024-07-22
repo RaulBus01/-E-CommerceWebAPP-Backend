@@ -13,8 +13,22 @@ exports.createOrder = async(req, res) => {
 
 exports.cancelOrder = async(req, res) => {
     try{
-        const order = await Order.findByIdAndDelete(req.params.id);
-        res.status(200).json("Order has been deleted");
+        const order = await Order.findById(req.params.id);
+        if(!order){
+            res.status(404).json("Order not found");
+            return;
+        }
+        if (order.status === "delivered") {
+            res.status(400).json("Order is already delivered");
+            return;
+        }
+        if (order.status === "cancelled") {
+            res.status(400).json("Order is already cancelled");
+            return;
+        }
+        await order.updateOne({$set: {status: "cancelled"}});
+
+        res.status(200).json("Order has been cancelled");
     } catch(error){
         res.status(500).json(error);
     }
@@ -22,10 +36,13 @@ exports.cancelOrder = async(req, res) => {
 
 exports.getAllOrders = async(req, res) => {
     try{
+     
         const orders = await Order.find();
-        res.status(200),json(orders);
+        
+        res.status(200).json(orders);
     } catch(error){
         res.status(500).json(error);
+        
     }
 }
 

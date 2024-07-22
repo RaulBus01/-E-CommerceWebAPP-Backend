@@ -4,9 +4,9 @@ const router = require('express').Router();
 const cartController = require('../controllers/cartController');
 
 //CREATE
-router.post("/add",verifyToken,cartController.createCart);
+router.post("/add/:id",verifyTokenAndAuthorization,cartController.createCart);
 //UPDATE
-router.patch("/edit/:id",verifyTokenAndAuthorization,cartController.updateCart);
+router.put("/edit/:id",verifyTokenAndAuthorization,cartController.addProductToCart);
 //DELETE
 router.delete("/delete/:id",verifyTokenAndAuthorization,cartController.deleteCart);
 //DELETE PRODUCT FROM CART
