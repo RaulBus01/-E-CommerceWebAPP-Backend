@@ -1,7 +1,7 @@
 const Favourites = require("../models/Favourites");
 
 exports.createFavourites = async (req, res) => {
-  const newFavourites = new Favourites({products:[], userId: req.params.id });
+  const newFavourites = new Favourites({products:[], userId: req.body.id });
   try {
     const savedFavourites = await newFavourites.save();
     res.status(200).json(savedFavourites);
@@ -14,9 +14,9 @@ exports.addFavourites = async (req, res) => {
   try {
 
     const favourites = await Favourites.findOne(
-      { userId: req.params.id },  
+      { userId: req.body.id },  
     );
-    console.log(favourites);
+    
     if(!favourites || favourites === null){
       res.status(404).json("Favourites list not found");
       return;
@@ -40,14 +40,14 @@ exports.addFavourites = async (req, res) => {
 
 exports.deleteProductFromFavourites = async (req, res) => {
   try {
-    const favourites = await Favourites.findOne({ user: req.params.userId });
+    const favourites = await Favourites.findOne({ userId: req.body.id });
 
     if (!favourites) {
       res.status(404).json("Favourites list not found");
       return;
     }
 
-    await favourites.updateOne({ $pull: { products: req.params.productId } });
+    await favourites.updateOne({ $pull: { products: req.body.productId } });
     res.status(200).json("Product has been deleted from favourites");
   } catch (err) {
     res.status(500).json(err);
@@ -56,10 +56,14 @@ exports.deleteProductFromFavourites = async (req, res) => {
 
 exports.deleteAllFavourites = async (req, res) => {
   try {
-    const favourites = await Favourites.findOne({ user: req.params.userId });
+    const favourites = await Favourites.findOne({ userId: req.body.id });
 
     if (!favourites) {
       res.status(404).json("Favourites list not found");
+      return;
+    }
+    if(favourites.products.length === 0){
+      res.status(400).json("Favourites list is already empty");
       return;
     }
 
@@ -75,7 +79,7 @@ exports.deleteAllFavourites = async (req, res) => {
 exports.getFavourites = async (req, res) => {
   try {
     const favourites = await Favourites.findOne({
-      user: req.params.userId,
+      userId: req.body.id,
     });
 
     if (!favourites) {

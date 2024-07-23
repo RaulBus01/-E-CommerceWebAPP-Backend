@@ -1,19 +1,67 @@
 const Order = require('../models/Order');
+const Product = require('../models/Product');
 
-exports.createOrder = async(req, res) => {
-    const newOrder = new Order(req.body);
+exports.createOrder = async (req, res) => {
+    try {
+        const products = req.body.products;
+        if (!products || products.length === 0) {
+            return res.status(400).json("No products in cart");
+        }
 
-    try{
-        const order = await newOrder.save();
-        res.status(200).json(order);
-    } catch(error){
-        res.status(500).json(error);
+        let totalPrice = 0;
+        const ordersByDistributor = new Map();
+
+        for (const product of products) {
+            const checkProduct = await Product.findById(product.productId);
+            if (!checkProduct) {
+                return res.status(400).json(`Product not found: ${product.productId}`);
+            }
+
+            // Uncomment if you want to check stock
+            // if (checkProduct.stock < product.quantity) {
+            //     return res.status(400).json(`Product out of stock: ${product.productId}`);
+            // }
+
+            const { price, distributorId } = checkProduct;
+            totalPrice += price * product.quantity;
+
+            if (!ordersByDistributor.has(distributorId)) {
+                ordersByDistributor.set(distributorId, {
+                    products: [],
+                    totalPrice: 0
+                });
+            }
+            
+            ordersByDistributor.get(distributorId).products.push(product);
+            ordersByDistributor.get(distributorId).totalPrice += price * product.quantity;
+        }
+
+        const orders = [];
+        for (const [distributorId, orderData] of ordersByDistributor) {
+            const newOrder = new Order({
+                userId: req.body.userId,
+                products: orderData.products,
+                status: "pending",
+                address: req.body.address,
+                totalPrice: orderData.totalPrice,
+                distributorId: distributorId,
+            });
+            orders.push(await newOrder.save());
+        }
+
+        res.status(201).json({
+            message: "Orders created successfully",
+            orders: orders
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
-}
+};
 
 exports.cancelOrder = async(req, res) => {
     try{
-        const order = await Order.findById(req.params.id);
+        const order = await Order.findById(req.params.orderId);
+        
         if(!order){
             res.status(404).json("Order not found");
             return;
@@ -48,19 +96,20 @@ exports.getAllOrders = async(req, res) => {
 
 exports.getOrdersByUser = async(req, res) => {
     try{
-        const orders = await Order.find({userId: req.params.id});
+        const orders = await Order.find({userId: req.body.id});
         res.status(200).json(orders);
     } catch(error){
         res.status(500).json(error);
     }
 }
 
-exports.editOrder = async(req, res) => {
+exports.editOrderStatus = async(req, res) => {
     try{
-        const editedOrder = await Order.findByIdAndUpdate(req.params.id,
+        const editedOrder = await Order.findByIdAndUpdate(req.params.orderId,
             {
                 $set: req.body,
             }, {new: true});
+        console.log(editedOrder);
         res.status(200).json(editedOrder);
     } catch(error){
         res.status(500).json(error);

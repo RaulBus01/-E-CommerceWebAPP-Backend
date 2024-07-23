@@ -1,59 +1,18 @@
-const { verifyTokenAndAuthorization, verifyTokenAndAdmin, verifyTokenAndDistributor, verifyTokenAndDeleteProductAuthorization } = require("../middleware/verifyToken");
-const Product = require("../models/Product");
+const { verifyTokenAndDistributor,verifyTokenAndEditProductAuthorization } = require("../middleware/verifyToken");
 const router = require("./eventRoutes");
+const productController = require("../controllers/productController");
 
 
 //CREATE
-router.post("/add", verifyTokenAndDistributor, async (req, res) => {
-
-    const newProduct = new Product(req.body);
-    try {
-        
-        const savedProduct = await newProduct.save();
-        res.status(200).json(savedProduct);
-    } catch (err) {
-        res.status(500).json(err);
-    }
-})
+router.post("/add", verifyTokenAndDistributor,productController.createProduct); 
 //UPDATE
-router.put("/edit/:id", verifyTokenAndDistributor, async (req, res) => {
-    try {
-        const updatedProduct = await Product.findByIdAndUpdate(req.params.id, {
-            $set: req.body,
-        }, { new: true });
-        res.status(200).json(updatedProduct);
-    } catch (err) {
-        res.status(500).json(err);
-    }
-})
+router.put("/edit", verifyTokenAndEditProductAuthorization,productController.updateProduct);
 //DELETE
-router.delete("/delete/:id", verifyTokenAndDeleteProductAuthorization, async (req, res) => {
-    try {
-        await Product.findByIdAndDelete(req.params.id);
-        res.status(200).json("Product has been deleted");
-    } catch (err) {
-        res.status(500).json(err);
-    }
-})
+router.delete("/delete", verifyTokenAndEditProductAuthorization, productController.deleteProduct);
 //GET PRODUCT BY ID
-router.get("/find/:id", async (req, res) => {
-    try {
-        const product = await Product.findById(req.params.id);
-        res.status(200).json(product);
-    } catch (err) {
-        res.status(500).json(err);
-    }
-})
+router.get("/find",productController.getProduct);
 // GET ALL PRODUCTS
-router.get("/findAll", async (req, res) => {
-    try {
-        const products = await Product.find();
-        res.status(200).json(products);
-    } catch (err) {
-        res.status(500).json(err);
-    }
-})
-
+router.get("/findAll", productController.getAllProducts);
 
 
 

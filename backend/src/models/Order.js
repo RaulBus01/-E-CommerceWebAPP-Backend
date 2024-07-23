@@ -6,6 +6,7 @@ const OrderSchema= new mongoose.Schema({
         type: String,
         required: true,
     },
+    
     products: {
         type: Array,
             productId: {
@@ -15,11 +16,7 @@ const OrderSchema= new mongoose.Schema({
             quantity: {
                 type: Number,
                 required: true,
-            },
-            price: {
-                type: Number,
-                required: true,
-            },
+            }
     },
     status: {
         type: String,
@@ -29,6 +26,14 @@ const OrderSchema= new mongoose.Schema({
         type: String,
         required: true,
     },
+    totalPrice: {
+        type: Number,
+        required: true,
+    },
+    distributorId: {
+        type: String,
+        required: true,
+    }
     
 }, {timestamps: true});
 

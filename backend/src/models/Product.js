@@ -21,6 +21,10 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    distributorId: {
+        type: String,
+        required: true,
+    },
 
     });
 
