@@ -29,6 +29,10 @@ const DistributorSchema = new mongoose.Schema({
     isDistributor: {
         type: Boolean,
         default: true,
+    },
+    isAuthorized: {
+        type: Boolean,
+        default: false,
     }
     
 
