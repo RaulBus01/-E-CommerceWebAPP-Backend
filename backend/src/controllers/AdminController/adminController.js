@@ -124,7 +124,7 @@ exports.deleteDistributor = async (req, res) => {
     }
 }
 exports.updateDistributor = async (req, res) => {
-    if(!req.body.isAuthorized){
+    if(!req.body.hasOwnProperty('isAuthorized')){
         res.status(403).json("You are not authorized to edit this field");
         return;
     }
@@ -150,14 +150,16 @@ exports.updateDistributor = async (req, res) => {
             res.status(404).json("User not found");
             return;
         }
-        req.body.isAuthorized = req.body.isAuthorized === 'True' ? true : false;
         
+        req.body.isAuthorized = req.body.isAuthorized === 'True' ? true : false;
+       
 
         const updatedDistributor = await Distributor.findOneAndUpdate(
             {_id: req.body.id}, 
             {$set: req.body},
             {new: true});
-        
+    
+     
 
         
         const {password, confirm_password, ...others} = updatedDistributor._doc;

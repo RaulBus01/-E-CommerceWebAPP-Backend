@@ -1,4 +1,4 @@
-const { verifyToken,verifyTokenAndCancelOrderAuthorization, verifyTokenAndAdmin, verifyTokenAndAuthorization, verifyTokenAndDistributor, verifyTokenAndEditOrderStatusAuthorization } = require('../middleware/verifyToken');
+const { verifyToken,verifyTokenAndCancelOrderAuthorization, verifyTokenAndAdmin, verifyTokenAndAuthorization, verifyTokenAndEditOrderStatusAuthorization } = require('../middleware/verifyToken');
 const orderController = require('../controllers/orderController');
 const verifyId = require('../middleware/verifyId');
 const router = require('express').Router();

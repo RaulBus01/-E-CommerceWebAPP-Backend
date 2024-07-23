@@ -15,6 +15,7 @@ const verifyToken = (req, res, next) => {
         {
             return res.status(403).json("Token is not valid");
         }
+        
         req.user = user;
         next();
     });
@@ -45,14 +46,29 @@ const verifyTokenAndAdmin = (req, res, next) => {
         }
     });
 }
-const verifyTokenAndDistributor = (req, res, next) => {
-    verifyToken(req, res, () => {
+const verifyTokenAndDistributor = async (req, res, next) => {
+    verifyToken(req, res,async  () => {
+        console.log(req.user);
         if (req.user.isDistributor)
         {
+            const distributor = await Distributor.findById(req.user.id);
+            if (!distributor)
+            {
+                return res.status(404).json("Distributor not found");
+            }
+            console.log(distributor);
+            if(!distributor.isAuthorized)
+            {
+                console.log("You are not an authorized distributor");
+                return res.status(403).json("You are not an authorized distributor");
+            }
+            
+
+
             next();
         } else
         {
-            res.status(403).json("You are not a distributor");
+            res.status(403).json("You are not an authorized distributor");
         }
     });
 }

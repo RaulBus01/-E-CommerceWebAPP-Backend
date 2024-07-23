@@ -4,6 +4,13 @@ const Product = require('../models/Product');
 exports.createOrder = async (req, res) => {
     try {
         const products = req.body.products;
+        const user = await User.findById(req.body.userId);
+        if (!user) {
+            return res.status(400).json("User not found");
+        }
+        if(!user.isVerified){
+            return res.status(400).json("User is not verified");
+        }
         if (!products || products.length === 0) {
             return res.status(400).json("No products in cart");
         }

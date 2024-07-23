@@ -9,6 +9,11 @@ exports.updateUser =async (req,res)=>
                 res.status(400).json("You can't update email address");
                 return;
             }
+        if(req.body.hasOwnProperty('isVerified'))
+            {
+                res.status(400).json("You can't update isVerified");
+                return;
+            }
                 
         if(req.body.password && req.body.confirm_password)
         {

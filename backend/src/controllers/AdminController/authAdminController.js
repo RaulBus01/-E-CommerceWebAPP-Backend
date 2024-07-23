@@ -8,6 +8,7 @@ exports.registerAdmin = async (req, res) => {
         email: req.body.email,
         password: CryptoJS.AES.encrypt(req.body.password, process.env.PASS_SECRET).toString(),
 
+
     });
     try {
         const checkAdmin = await Admin.findOne({email: req.body.email,});
@@ -30,6 +31,7 @@ exports.loginAdmin =  async (req, res) => {
     const email = req.body.email;
     const input_password = req.body.password;
     try {
+        
         const user = await Admin.findOne({
             email: email,
         });
