@@ -12,15 +12,19 @@ exports.createOrder = async (req, res) => {
         const ordersByDistributor = new Map();
 
         for (const product of products) {
+            if (product.productId.length !== 24)
+            {
+                return res.status(400).json(`Product ID is not valid`);
+            }
             const checkProduct = await Product.findById(product.productId);
             if (!checkProduct) {
                 return res.status(400).json(`Product not found: ${product.productId}`);
             }
 
             // Uncomment if you want to check stock
-            // if (checkProduct.stock < product.quantity) {
-            //     return res.status(400).json(`Product out of stock: ${product.productId}`);
-            // }
+            if (checkProduct.stock < product.quantity) {
+                return res.status(400).json(`Product out of stock: ${product.productId}`);
+            }
 
             const { price, distributorId } = checkProduct;
             totalPrice += price * product.quantity;

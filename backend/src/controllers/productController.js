@@ -13,7 +13,7 @@ exports.createProduct = async (req, res) => {
 }
 exports.updateProduct = async (req, res) => {
     try {
-        const updatedProduct = await Product.findByIdAndUpdate(req.body.productId, {
+        const updatedProduct = await Product.findByIdAndUpdate(req.body.id, {
             $set: req.body,
         }, { new: true });
         if(req.body.distributorId){
@@ -31,7 +31,7 @@ exports.updateProduct = async (req, res) => {
 }
 exports.deleteProduct = async (req, res) => {
         try {
-            await Product.findByIdAndDelete(req.body.productId);
+            await Product.findByIdAndDelete(req.body.id);
             res.status(200).json("Product has been deleted");
         } catch (err) {
             res.status(500).json(err);
@@ -48,7 +48,7 @@ exports.getAllProducts = async (req, res) => {
 }
 exports.getProduct = async (req, res) => {
     try {
-        const product = await Product.findById(req.body.productId);
+        const product = await Product.findById(req.body.id);
         res.status(200).json(product);
     } catch (err) {
         res.status(500).json(err);

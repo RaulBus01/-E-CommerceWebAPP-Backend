@@ -115,7 +115,7 @@ const verifyTokenAndEditOrderStatusAuthorization = async (req, res, next) => {
 const verifyTokenAndEditProductAuthorization = (req, res, next) => {
     verifyToken(req, res, async () => {
         try {
-            const product = await Product.findById(req.body.productId);
+            const product = await Product.findById(req.body.id);
             if (!product) {
                 return res.status(404).json("Product not found");
             }
@@ -137,12 +137,16 @@ const verifyTokenAndEditProductAuthorization = (req, res, next) => {
 const verifyTokenAndEditDistributorAuthorization = (req, res, next) => {
     verifyToken(req, res, async () => {
         try {
+            if(req.user.id !== req.body.id)
+            {
+                return res.status(403).json("You are not authorized to edit this distributor");
+            }
             const distributor = await Distributor.findById(req.body.id);
             if (!distributor) {
                 return res.status(404).json("Distributor not found");
             }
             
-            if (req.user.isDistributor && distributor.id === req.user.id) {
+            if (req.user.isDistributor) {
                 return next();
             }
             res.status(403).json("You are not authorized to edit this distributor");

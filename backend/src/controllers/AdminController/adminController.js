@@ -3,13 +3,8 @@ const Distributor = require("../../models/Distributor");
 
 exports.updateUser =async (req,res)=>
     {
-        if(req.body.email)
-            {
-                res.status(400).json("You can't update email address");
-                return;
-            }
-                
-        if(req.body.password || req.body.confirm_password)
+          
+        if (req.body.hasOwnProperty('password') || req.body.hasOwnProperty('confirm_password') || req.body.hasOwnProperty('email')) 
         {
             res.status(400).json("You can't update password");
             return;
@@ -51,7 +46,7 @@ exports.deleteUser = async (req, res) => {
 }
 exports.getUser = async (req, res) => {
     try {
-
+   
         const user = await User.findById(req.body.id);
         if(!user){
             res.status(404).json("User not found");

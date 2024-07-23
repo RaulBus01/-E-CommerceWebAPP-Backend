@@ -1,24 +1,25 @@
 const {verifyTokenAndAdmin } = require("../middleware/verifyToken");
+const verifyId = require("../middleware/verifyId");
 
 const router = require("express").Router();
 const AdminController = require("../controllers/AdminController/adminController");
 //UPDATE USER
-router.put("/edit",verifyTokenAndAdmin,AdminController.updateUser);
+router.put("/edit",verifyId,verifyTokenAndAdmin,AdminController.updateUser);
 //DELETE USER
-router.delete("/delete",verifyTokenAndAdmin, AdminController.deleteUser);
+router.delete("/delete",verifyId,verifyTokenAndAdmin, AdminController.deleteUser);
 //GET USER
-router.get("/findUser",verifyTokenAndAdmin,AdminController.getUser);
+router.get("/findUser",verifyId,verifyTokenAndAdmin,AdminController.getUser);
 
 //GET ALL USERS
 router.get("/findAllUsers",verifyTokenAndAdmin,AdminController.getAllUsers);
 
 //GET DISTRIBUTOR
-router.get("/findDistributor",verifyTokenAndAdmin,AdminController.getDistributor);
+router.get("/findDistributor",verifyId,verifyTokenAndAdmin,AdminController.getDistributor);
 //GET ALL DISTRIBUTORS
 router.get("/findAllDistributors",verifyTokenAndAdmin,AdminController.getAllDistributors);
 //DELETE DISTRIBUTOR
-router.delete("/deleteDistributor",verifyTokenAndAdmin,AdminController.deleteDistributor);
+router.delete("/deleteDistributor",verifyId,verifyTokenAndAdmin,AdminController.deleteDistributor);
 //UPDATE DISTRIBUTOR
-router.patch("/editDistributor",verifyTokenAndAdmin,AdminController.updateDistributor);
+router.patch("/editDistributor",verifyId,verifyTokenAndAdmin,AdminController.updateDistributor);
     
 module.exports = router;

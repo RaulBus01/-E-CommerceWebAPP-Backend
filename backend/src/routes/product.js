@@ -1,16 +1,17 @@
 const { verifyTokenAndDistributor,verifyTokenAndEditProductAuthorization } = require("../middleware/verifyToken");
 const router = require("./eventRoutes");
 const productController = require("../controllers/productController");
+const verifyId = require("../middleware/verifyId");
 
 
 //CREATE
 router.post("/add", verifyTokenAndDistributor,productController.createProduct); 
 //UPDATE
-router.put("/edit", verifyTokenAndEditProductAuthorization,productController.updateProduct);
+router.put("/edit", verifyId,verifyTokenAndEditProductAuthorization,productController.updateProduct);
 //DELETE
-router.delete("/delete", verifyTokenAndEditProductAuthorization, productController.deleteProduct);
+router.delete("/delete",verifyId, verifyTokenAndEditProductAuthorization, productController.deleteProduct);
 //GET PRODUCT BY ID
-router.get("/find",productController.getProduct);
+router.get("/find",verifyId,productController.getProduct);
 // GET ALL PRODUCTS
 router.get("/findAll", productController.getAllProducts);
 

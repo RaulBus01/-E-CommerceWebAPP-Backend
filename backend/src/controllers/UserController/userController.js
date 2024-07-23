@@ -4,7 +4,7 @@ const CryptoJS = require("crypto-js");
 
 exports.updateUser =async (req,res)=>
     {
-        if(req.body.email)
+        if(req.body.hasOwnProperty('email'))
             {
                 res.status(400).json("You can't update email address");
                 return;
