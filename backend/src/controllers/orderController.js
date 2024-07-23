@@ -45,8 +45,19 @@ exports.createOrder = async (req, res) => {
             const newOrder = new Order({
                 userId: req.body.userId,
                 products: orderData.products,
-                status: "pending",
-                address: req.body.address,
+                status: "Pending",
+                first_name: req.body.first_name,
+                last_name: req.body.last_name,
+                email: req.body.email,
+                phoneNumber: req.body.phoneNumber,
+                address: {
+                    country: req.body.address.country,
+                    county: req.body.address.county,
+                    city: req.body.address.city,
+                    street: req.body.address.street,
+                    number: req.body.address.number,
+                    zip: req.body.address.zip,
+                },
                 totalPrice: orderData.totalPrice,
                 distributorId: distributorId,
             });
@@ -55,7 +66,6 @@ exports.createOrder = async (req, res) => {
 
         res.status(201).json({
             message: "Orders created successfully",
-            orders: orders
         });
     } catch (err) {
         res.status(500).json({ error: err.message });

@@ -30,8 +30,36 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-
-    });
+    ratingProduct: {
+        type: Number,
+        required: false,
+    },
+    reviews:{
+        userId: {
+            type: String,
+            required: false,
+        },
+        rating: {
+            type: Number,
+            required: false,
+        },
+        comment: {
+            type: String,
+            required: false,
+        }
+    
+    },
+    comments:{
+        userId: {
+            type: String,
+            required: false,
+          },
+            comment: {
+                type: String,
+                required: false,
+            }
+        }
+    }, {timestamps: true});
 
 const Product = mongoose.model('Product', productSchema);
 module.exports = Product;

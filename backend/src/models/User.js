@@ -28,8 +28,32 @@ const userSchema = new mongoose.Schema({
         required: false,
     },
     address: {
-        type: String,
-        required: false,
+        country: {
+            type: String,
+            required: false,
+        },
+        county:{
+            type: String,
+            required: false,
+        },
+        city: {
+            type: String,
+            required: false,
+        },
+        street: {
+            type: String,
+            required: false,
+        },
+        number: {
+            type: String,
+            required: false,
+        },
+        zip: {
+            type: String,
+            required: false,
+        },
+
+
     }
 
     }, {timestamps: true});
