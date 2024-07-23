@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const Order = require("../models/Order");
 const Product = require("../models/Product");
+const Distributor = require("../models/Distributor");
 
 const verifyToken = (req, res, next) => {
     const authHeader = req.headers.token;
@@ -115,7 +116,6 @@ const verifyTokenAndEditProductAuthorization = (req, res, next) => {
     verifyToken(req, res, async () => {
         try {
             const product = await Product.findById(req.body.productId);
-            console.log(product);
             if (!product) {
                 return res.status(404).json("Product not found");
             }
@@ -133,5 +133,29 @@ const verifyTokenAndEditProductAuthorization = (req, res, next) => {
         }
     });
 }
-module.exports = {verifyToken, verifyTokenAndAuthorization,verifyTokenAndAdmin,verifyTokenAndDistributor,verifyTokenAndEditProductAuthorization,verifyTokenAndCancelOrderAuthorization,verifyTokenAndEditOrderStatusAuthorization};
+
+const verifyTokenAndEditDistributorAuthorization = (req, res, next) => {
+    verifyToken(req, res, async () => {
+        try {
+            const distributor = await Distributor.findById(req.body.id);
+            if (!distributor) {
+                return res.status(404).json("Distributor not found");
+            }
+            
+            if (req.user.isDistributor && distributor.id === req.user.id) {
+                return next();
+            }
+            res.status(403).json("You are not authorized to edit this distributor");
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    }
+    );
+}
+
+
+
+
+
+module.exports = {verifyToken, verifyTokenAndAuthorization,verifyTokenAndAdmin,verifyTokenAndDistributor,verifyTokenAndEditProductAuthorization,verifyTokenAndCancelOrderAuthorization,verifyTokenAndEditOrderStatusAuthorization, verifyTokenAndEditDistributorAuthorization};
 

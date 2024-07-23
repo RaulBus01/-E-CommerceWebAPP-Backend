@@ -109,7 +109,6 @@ exports.editOrderStatus = async(req, res) => {
             {
                 $set: req.body,
             }, {new: true});
-        console.log(editedOrder);
         res.status(200).json(editedOrder);
     } catch(error){
         res.status(500).json(error);

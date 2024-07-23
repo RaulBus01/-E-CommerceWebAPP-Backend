@@ -3,7 +3,6 @@ const distributorController = require('../../controllers/DistributorController/a
 
 
 //Register Distributor
-
 router.post('/register', distributorController.registerDistributor);
 
 

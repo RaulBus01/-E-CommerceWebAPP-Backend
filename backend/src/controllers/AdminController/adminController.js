@@ -57,7 +57,6 @@ exports.getUser = async (req, res) => {
             res.status(404).json("User not found");
             return;
         }
-     
 
         const { password, confirm_password, ...others } = user._doc;
 
