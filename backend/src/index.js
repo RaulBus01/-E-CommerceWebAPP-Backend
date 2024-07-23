@@ -6,6 +6,7 @@ const authAdminRoute = require('./routes/auth/authAdmin');
 const authDistributorRoute = require('./routes/auth/authDistributor');
 const userRoutes = require('./routes/user');
 const adminRoutes = require('./routes/admin');
+const distributorRoutes = require('./routes/distributor');
 const productRoutes = require('./routes/product');
 const orderRoutes = require('./routes/order');
 const cartRoutes = require('./routes/cart');
@@ -26,6 +27,7 @@ app.use("/api/authDistributor", authDistributorRoute);
 app.use("/api/events", eventRoutes); 
 app.use("/api/users", userRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/distributor", distributorRoutes);
 
 app.use("/api/products", productRoutes);
 app.use("/api/cart",cartRoutes);
