@@ -35,13 +35,15 @@ const productSchema = new mongoose.Schema({
         required: false,
     },
 }, {timestamps: true});
-    productSchema.virtual('reviews',{
-        ref: 'Review',
-        localField: '_id',
-        foreignField: 'productId'
-    });
-    productSchema.set('toObject', { virtuals: true });
-    productSchema.set('toJSON', { virtuals: true });
+productSchema.virtual('reviews',{
+    ref: 'Review',
+    localField: '_id',
+    foreignField: 'productId'
+});
+
+productSchema.set('toObject', { virtuals: true });
+productSchema.set('toJSON', { virtuals: true });
+
 productSchema.virtual('questions',{
     ref: 'Question',
     localField: '_id',

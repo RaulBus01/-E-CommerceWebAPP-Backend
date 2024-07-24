@@ -3,7 +3,6 @@ const Order = require("../models/Order");
 const Product = require("../models/Product");
 const Distributor = require("../models/Distributor");
 const User = require('../models/User');
-const User = require("../models/User");
 const Question = require("../models/Question");
 
 const verifyToken = (req, res, next) => {
