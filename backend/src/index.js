@@ -12,6 +12,7 @@ const orderRoutes = require('./routes/order');
 const cartRoutes = require('./routes/cart');
 const voucherRoutes = require('./routes/voucher');
 const favouritesRoutes = require('./routes/favourites');
+const reviewsRoutes = require('./routes/review');
 const dotenv = require('dotenv');
 
 dotenv.config();
@@ -35,8 +36,7 @@ app.use("/api/voucher",voucherRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/products",productRoutes);
 app.use("/api/favourites",favouritesRoutes);
-
-
+app.use("/api/reviews", reviewsRoutes);
 
 app.listen(process.env.PORT, () => {
   console.log(`Server is running on port ${process.env.PORT}`);

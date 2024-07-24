@@ -1,4 +1,5 @@
 const Product = require('../models/Product');
+const Review = require('../models/Review');
 
 exports.createProduct = async (req, res) => {
 

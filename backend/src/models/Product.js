@@ -34,32 +34,14 @@ const productSchema = new mongoose.Schema({
         type: Number,
         required: false,
     },
-    reviews:{
-        userId: {
-            type: String,
-            required: false,
-        },
-        rating: {
-            type: Number,
-            required: false,
-        },
-        comment: {
-            type: String,
-            required: false,
-        }
-    
-    },
-    comments:{
-        userId: {
-            type: String,
-            required: false,
-          },
-            comment: {
-                type: String,
-                required: false,
-            }
-        }
-    }, {timestamps: true});
+}, {timestamps: true});
+    productSchema.virtual('reviews',{
+        ref: 'Review',
+        localField: '_id',
+        foreignField: 'productId'
+    });
+    productSchema.set('toObject', { virtuals: true });
+    productSchema.set('toJSON', { virtuals: true });
 
 const Product = mongoose.model('Product', productSchema);
 module.exports = Product;
