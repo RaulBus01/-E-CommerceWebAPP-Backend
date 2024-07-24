@@ -42,6 +42,11 @@ const productSchema = new mongoose.Schema({
     });
     productSchema.set('toObject', { virtuals: true });
     productSchema.set('toJSON', { virtuals: true });
+productSchema.virtual('questions',{
+    ref: 'Question',
+    localField: '_id',
+    foreignField: 'productId'
+});
 
 const Product = mongoose.model('Product', productSchema);
 module.exports = Product;
