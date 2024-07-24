@@ -1,5 +1,5 @@
 const { verifyTokenAndDistributor,verifyTokenAndEditProductAuthorization } = require("../middleware/verifyToken");
-const router = require("./eventRoutes");
+const router = require("express").Router();
 const productController = require("../controllers/productController");
 const verifyId = require("../middleware/verifyId");
 

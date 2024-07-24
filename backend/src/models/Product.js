@@ -49,17 +49,17 @@ const productSchema = new mongoose.Schema({
         }
     
     },
-    comments:{
-        userId: {
-            type: String,
-            required: false,
-          },
-            comment: {
-                type: String,
-                required: false,
-            }
-        }
-    }, {timestamps: true});
+    // questions:{
+    //     type: [mongoose.Schema.Types.ObjectId],
+    //     ref: 'Question'
+    // }
+    }, {timestamps: true, toJSON: {virtuals: true}, toObject: {virtuals: true}
+    });
+productSchema.virtual('questions',{
+    ref: 'Question',
+    localField: '_id',
+    foreignField: 'productId'
+});
 
 const Product = mongoose.model('Product', productSchema);
 module.exports = Product;
