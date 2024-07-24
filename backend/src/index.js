@@ -13,6 +13,7 @@ const cartRoutes = require('./routes/cart');
 const voucherRoutes = require('./routes/voucher');
 const favouritesRoutes = require('./routes/favourites');
 const reviewsRoutes = require('./routes/review');
+const questionRoutes = require('./routes/question');
 const dotenv = require('dotenv');
 
 dotenv.config();
@@ -35,6 +36,7 @@ app.use("/api/cart",cartRoutes);
 app.use("/api/voucher",voucherRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/products",productRoutes);
+app.use("/api/question",questionRoutes);
 app.use("/api/favourites",favouritesRoutes);
 app.use("/api/reviews", reviewsRoutes);
 

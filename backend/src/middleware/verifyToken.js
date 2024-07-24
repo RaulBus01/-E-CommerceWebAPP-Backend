@@ -2,7 +2,8 @@ const jwt = require("jsonwebtoken");
 const Order = require("../models/Order");
 const Product = require("../models/Product");
 const Distributor = require("../models/Distributor");
-const User = require('../models/User');
+const User = require("../models/User");
+const Question = require("../models/Question");
 
 const verifyToken = (req, res, next) => {
     const authHeader = req.headers.token;
@@ -174,10 +175,10 @@ const verifyTokenAndEditDistributorAuthorization = (req, res, next) => {
     }
     );
 }
-
 const verifyTokenAndUserAuthorization = (req, res, next) => {
     verifyToken(req, res, async () => {
         try {
+            
             if(req.user.id !== req.body.userId)
             {
                 return res.status(403).json("You are not authorized");
@@ -187,7 +188,7 @@ const verifyTokenAndUserAuthorization = (req, res, next) => {
                 return res.status(404).json("User not found");
             }
             
-            if (req.body.userId === user.id) {
+            if (req.user.id === user.id) {
                 return next();
             }
             res.status(403).json("You are not authorized to do this");
@@ -197,8 +198,36 @@ const verifyTokenAndUserAuthorization = (req, res, next) => {
     }
     );
 }
+const verifyTokenAndReplyAuthorization = (req, res, next) => {
+    verifyToken(req, res, async () => {
+        try {
+            const question = await Question.findById(req.body.questionId);
+            if (!question) {
+                return res.status(404).json("Question not found");
+            }
+            if (req.user.isAdmin) {
+                return next();
+            }
+            if (req.user.isDistributor) {
+                const product = await Product.findById(question.productId);
+                if (product.distributorId === req.user.id) {
+                    return next();
+                }
+            }
+            if(verifyTokenAndUserAuthorization)
+            {
+                return next();
+            }
+            res.status(403).json("You are not authorized to reply to this question");
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
+}
 
 
 
-module.exports = {verifyToken, verifyTokenAndAuthorization,verifyTokenAndAdmin,verifyTokenAndDistributor,verifyTokenAndEditProductAuthorization,verifyTokenAndCancelOrderAuthorization,verifyTokenAndEditOrderStatusAuthorization, verifyTokenAndEditDistributorAuthorization, verifyTokenAndUserAuthorization};
+
+
+module.exports = {verifyToken, verifyTokenAndAuthorization,verifyTokenAndAdmin,verifyTokenAndDistributor,verifyTokenAndEditProductAuthorization,verifyTokenAndCancelOrderAuthorization,verifyTokenAndEditOrderStatusAuthorization, verifyTokenAndEditDistributorAuthorization, verifyTokenAndUserAuthorization, verifyTokenAndReplyAuthorization};
 
