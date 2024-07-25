@@ -11,7 +11,7 @@ router.put("/edit", verifyId,verifyTokenAndEditProductAuthorization,productContr
 //DELETE
 router.delete("/delete",verifyId, verifyTokenAndEditProductAuthorization, productController.deleteProduct);
 //GET PRODUCT BY ID
-router.get("/find",verifyId,productController.getProduct);
+router.get("/find/:id",verifyId,productController.getProduct);
 // GET ALL PRODUCTS
 router.get("/findAll", productController.getAllProducts);
 

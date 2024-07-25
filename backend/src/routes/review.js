@@ -6,7 +6,7 @@ const { verifyTokenAndAdmin, verifyTokenAndUserAuthorization } = require("../mid
 //ADD REVIEW
 router.post("/addReview", verifyId, verifyTokenAndUserAuthorization, reviewController.addReviewToProduct);
 //GET REVIEWS BY PRODUCT
-router.get("/getReviewsForProduct", verifyId, reviewController.getReviewsByProduct);
+router.get("/getReviewsForProduct/:productId", verifyId, reviewController.getReviewsByProduct);
 //GET REVIEWS BY USER
 router.get("/getReviewsByUser", verifyId, verifyTokenAndUserAuthorization, reviewController.getReviewsByUser);
 //DELETE REVIEW

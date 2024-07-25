@@ -8,13 +8,13 @@ router.put("/edit",verifyId,verifyTokenAndAdmin,AdminController.updateUser);
 //DELETE USER
 router.delete("/delete",verifyId,verifyTokenAndAdmin, AdminController.deleteUser);
 //GET USER
-router.get("/findUser",verifyId,verifyTokenAndAdmin,AdminController.getUser);
+router.get("/findUser/:id",verifyId,verifyTokenAndAdmin,AdminController.getUser);
 
 //GET ALL USERS
 router.get("/findAllUsers",verifyTokenAndAdmin,AdminController.getAllUsers);
 
 //GET DISTRIBUTOR
-router.get("/findDistributor",verifyId,verifyTokenAndAdmin,AdminController.getDistributor);
+router.get("/findDistributor/:id",verifyId,verifyTokenAndAdmin,AdminController.getDistributor);
 //GET ALL DISTRIBUTORS
 router.get("/findAllDistributors",verifyTokenAndAdmin,AdminController.getAllDistributors);
 //DELETE DISTRIBUTOR

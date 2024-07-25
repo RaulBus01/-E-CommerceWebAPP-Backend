@@ -39,7 +39,7 @@ exports.addReviewToProduct = async (req, res) => {
 }
 exports.getReviewsByProduct = async (req, res) => {
     try{
-        const product = await Product.findById(req.body.productId);
+        const product = await Product.findById(req.params.productId);
         if(!product){
             res.status(404).json("Product not found!");
             return;

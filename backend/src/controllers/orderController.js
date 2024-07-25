@@ -117,7 +117,7 @@ exports.getAllOrders = async(req, res) => {
 
 exports.getOrdersByUser = async(req, res) => {
     try{
-        const orders = await Order.find({userId: req.body.id});
+        const orders = await Order.find({userId: req.params.id});
         res.status(200).json(orders);
     } catch(error){
         res.status(500).json(error);

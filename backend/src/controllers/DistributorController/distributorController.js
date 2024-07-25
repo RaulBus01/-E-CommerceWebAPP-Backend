@@ -53,7 +53,7 @@ exports.updateDistributor =async (req,res)=>
 exports.getDistributor = async (req, res) => {
     try {
 
-        const distributor = await Distributor.findById(req.body.id);
+        const distributor = await Distributor.findById(req.params.id);
         if(!distributor){
             res.status(404).json("Distributor not found");
             return;

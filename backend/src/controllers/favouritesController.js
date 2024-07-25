@@ -79,7 +79,7 @@ exports.deleteAllFavourites = async (req, res) => {
 exports.getFavourites = async (req, res) => {
   try {
     const favourites = await Favourites.findOne({
-      userId: req.body.id,
+      userId: req.params.id,
     });
 
     if (!favourites) {

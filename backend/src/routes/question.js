@@ -12,7 +12,7 @@ router.delete("/deleteQuestion",verifyId,verifyTokenAndAdmin, questionController
 //DELETE REPLY
 router.delete("/deleteReply",verifyId,verifyTokenAndAdmin, questionController.deleteReply);
 //GET ALL QUESTIONS BY PRODUCT ID
-router.get("/findQuestion",questionController.getQuestion);
+router.get("/findQuestion/:productId",questionController.getQuestion);
 
 
 

@@ -15,7 +15,7 @@ router.delete("/deleteProduct", verifyTokenAndAuthorization, favouritesControlle
 router.delete("/deleteAll", verifyTokenAndAuthorization, favouritesController.deleteAllFavourites);
 
 //GET FAVOURITES BY USER ID
-router.get("/find", verifyTokenAndAuthorization, favouritesController.getFavourites);
+router.get("/find/:id", verifyTokenAndAuthorization, favouritesController.getFavourites);
 
 //GET ALL FAVOURITES
 router.get("/findAll", verifyTokenAndAdmin, favouritesController.getAllFavourites);

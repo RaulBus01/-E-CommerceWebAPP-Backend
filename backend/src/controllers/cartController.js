@@ -91,7 +91,7 @@ exports.getCart = async (req, res) => {
     try {
         
         const cart = await Cart.findOne({
-        userId: req.body.id,
+        userId: req.params.id,
         });
 
         if (!cart) {

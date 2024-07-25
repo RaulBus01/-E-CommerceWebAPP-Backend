@@ -66,7 +66,7 @@ exports.deleteReply = async (req, res) => {
 }
 exports.getQuestion = async (req, res) => {
     try {
-        const questions = await Question.find({ productId: req.body.productId })
+        const questions = await Question.find({ productId: req.params.productId })
             .populate({
                 path: 'replies',
                 options: { sort: { createdAt: -1 } } 

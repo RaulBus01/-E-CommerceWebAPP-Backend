@@ -6,7 +6,7 @@ const router = require("express").Router();
 //UPDATE
 router.put("/edit",verifyTokenAndEditDistributorAuthorization,distributorController.updateDistributor);
 //GET DISTRIBUTOR
-router.get("/find",verifyTokenAndEditDistributorAuthorization,distributorController.getDistributor);
+router.get("/find/:id",verifyTokenAndEditDistributorAuthorization,distributorController.getDistributor);
 
 
 module.exports = router;

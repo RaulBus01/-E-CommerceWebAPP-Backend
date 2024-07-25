@@ -13,7 +13,7 @@ router.delete("/deleteAll",verifyTokenAndAuthorization,cartController.deleteCart
 //DELETE PRODUCT FROM CART
 router.delete("/deleteProduct",verifyTokenAndAuthorization,cartController.deleteProductFromCart);
 //GET CART BY USER ID
-router.get("/find",verifyTokenAndAuthorization,cartController.getCart);
+router.get("/find/:id",verifyTokenAndAuthorization,cartController.getCart);
 // GET ALL CARTS
 router.get("/findAll",verifyTokenAndAdmin,cartController.getAllCarts);
 //EDIT QUANTITY IN CART

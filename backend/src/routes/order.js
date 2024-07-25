@@ -12,7 +12,7 @@ router.get("/order/:id",verifyId,verifyToken, orderController.getOrder);
 //GET ALL ORDERS(ADMIN)
 router.get("/findAllOrders", verifyTokenAndAdmin, orderController.getAllOrders);
 //GET ORDERS BY USER(USER)
-router.get("/yourOrders", verifyTokenAndAuthorization, orderController.getOrdersByUser);
+router.get("/yourOrders/:id", verifyTokenAndAuthorization, orderController.getOrdersByUser);
 //EDIT ORDER(DISTRIBUTOR)
 router.patch("/editOrderStatus/:id", verifyId,verifyTokenAndEditOrderStatusAuthorization, orderController.editOrderStatus);
 
