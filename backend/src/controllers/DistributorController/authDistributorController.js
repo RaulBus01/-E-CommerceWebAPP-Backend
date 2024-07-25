@@ -8,15 +8,17 @@ exports.registerDistributor = async (req, res) => {
         email: req.body.email,
         password: CryptoJS.AES.encrypt(req.body.password, process.env.PASS_SECRET).toString(),
         phoneNumber: req.body.phoneNumber,
-        address: req.body.address,
+        address: {
+            country: req.body.address.country,
+            county: req.body.address.county,
+            city: req.body.address.city,
+            street: req.body.address.street,
+            number: req.body.address.number,
+            zip: req.body.address.zip,
+        },
         CUI: req.body.CUI,
     });
     try {
-        const checkDistributor = await Distributor.findOne({email: req.body.email,});
-        if (checkDistributor) {
-            res.status(404).json("Distributor already exists");
-            return;
-        }
         if(req.body.password.length < 6){
             res.status(400).json("Password must be at least 6 characters long");
             return;
@@ -65,7 +67,11 @@ exports.loginDistributor = async (req, res) => {
             }, process.env.JWT_SECRET, {expiresIn: "3d"});
 
 
-            res.status(200).json({...others, accessToken});
+            res.status(200).json({
+                user: others,
+                accessToken: accessToken,
+
+            });
            
         } else {
             res.status(401).json("Wrong password");
