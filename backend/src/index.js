@@ -15,11 +15,15 @@ const favouritesRoutes = require('./routes/favourites');
 const reviewsRoutes = require('./routes/review');
 const questionRoutes = require('./routes/question');
 const dotenv = require('dotenv');
+const cors = require('cors');
+
+
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 //Authentication
 app.use("/api/authUser", authUserRoute); 
 app.use("/api/authAdmin", authAdminRoute);

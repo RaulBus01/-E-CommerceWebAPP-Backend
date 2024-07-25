@@ -49,8 +49,10 @@ exports.loginAdmin =  async (req, res) => {
             }, process.env.JWT_SECRET, {expiresIn: "3d"});
 
 
-            res.status(200).json({...others, accessToken});
-           
+            res.status(200).json({
+                user: others,
+                accessToken,
+            });
         } else {
             res.status(401).json("Wrong password");
         }
