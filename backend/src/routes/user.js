@@ -9,7 +9,7 @@ router.put("/edit",verifyTokenAndAuthorization,userController.updateUser);
 //DELETE
 router.delete("/delete",verifyTokenAndAuthorization, userController.deleteUser);
 //GET USER
-router.get("/find",verifyTokenAndAuthorization,userController.getUser);
+router.get("/find/:id",verifyTokenAndAuthorization,userController.getUser);
 
 //ACTIVATE ACCOUNT
 router.get("/confirmAccount/:token", async (req, res)=>
