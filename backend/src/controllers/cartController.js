@@ -76,10 +76,13 @@ exports.deleteCart = async (req, res) => {
             res.status(404).json("Cart not found");
             return;
           }
+          if(cart.products.length === 0){
+            res.status(400).json("Cart is already empty");
+            return;
+          }
       
-          await Cart.updateOne(
-            { $set: { products: [] } }
-          );
+        cart.products = [];
+        await cart.save();
           res.status(200).json("Cart has been deleted");
         } catch (err) {
           res.status(500).json(err);

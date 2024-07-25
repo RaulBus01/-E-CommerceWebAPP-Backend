@@ -9,7 +9,7 @@ router.post("/create",verifyTokenAndAuthorization,cartController.createCart);
 //UPDATE
 router.put("/add",verifyTokenAndAuthorization,cartController.addProductToCart);
 //DELETE
-router.delete("/deleteAll",verifyTokenAndAuthorization,cartController.deleteCart);
+router.delete("/deleteAll",verifyTokenAndAdmin,cartController.deleteCart);
 //DELETE PRODUCT FROM CART
 router.delete("/deleteProduct",verifyTokenAndAuthorization,cartController.deleteProductFromCart);
 //GET CART BY USER ID
