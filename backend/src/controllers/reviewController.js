@@ -52,12 +52,12 @@ exports.getReviewsByProduct = async (req, res) => {
 }
 exports.getReviewsByUser = async (req, res) => {
     try{
-        const user = await User.findById(req.body.userId);
+        const user = await User.findById(req.params.id);
         if(!user){
             res.status(404).json("User not found!");
             return;
         }
-        const reviews = await Review.find({userId: req.body.userId});
+        const reviews = await Review.find({userId: req.params.id});
         res.status(200).json(reviews);
     }catch(error){
         res.status(500).json(error);
