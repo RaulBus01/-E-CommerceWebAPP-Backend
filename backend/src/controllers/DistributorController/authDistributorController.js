@@ -1,5 +1,6 @@
 const Distributor = require('../../models/Distributor');
 const CryptoJS = require('crypto-js');
+
 const jwt = require('jsonwebtoken');
 
 exports.registerDistributor = async (req, res) => {
@@ -7,6 +8,7 @@ exports.registerDistributor = async (req, res) => {
         name: req.body.name,
         email: req.body.email,
         password: CryptoJS.AES.encrypt(req.body.password, process.env.PASS_SECRET).toString(),
+        confirm_password: CryptoJS.AES.encrypt(req.body.confirm_password, process.env.PASS_SECRET).toString(),
         phoneNumber: req.body.phoneNumber,
         address: {
             country: req.body.address.country,
@@ -19,6 +21,7 @@ exports.registerDistributor = async (req, res) => {
         CUI: req.body.CUI,
     });
     try {
+        
         if(req.body.password.length < 6){
             res.status(400).json("Password must be at least 6 characters long");
             return;
@@ -37,11 +40,21 @@ exports.registerDistributor = async (req, res) => {
             res.status(400).json("CUI must be at 6 characters long");
             return;
         }
-        
-       
-        
-        const user = await newDistributor.save();
-        res.status(200).json(user);
+        const savedDistributor = await newDistributor.save();
+        if(!savedDistributor){
+            res.status(400).json("Distributor not saved");
+            return;
+        }
+        const accessToken = jwt.sign({
+            id: newDistributor._id,
+            isAdmin: newDistributor.isAdmin,
+        }, process.env.JWT_SECRET, {expiresIn: "3d"});
+        const {password, confirm_password, ...others} = savedDistributor._doc;
+        res.status(200).json({
+            user: others,
+            accessToken: accessToken,
+        });
+
     } catch (err) {
         res.status(500).json(err);
     }

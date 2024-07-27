@@ -50,7 +50,7 @@ const verifyTokenAndAdmin = (req, res, next) => {
 }
 const verifyTokenAndDistributor = async (req, res, next) => {
     verifyToken(req, res,async  () => {
-        console.log(req.user);
+     
         if (req.user.isDistributor)
         {
             const distributor = await Distributor.findById(req.user.id);
@@ -58,10 +58,10 @@ const verifyTokenAndDistributor = async (req, res, next) => {
             {
                 return res.status(404).json("Distributor not found");
             }
-            console.log(distributor);
+        
             if(!distributor.isAuthorized)
             {
-                console.log("You are not an authorized distributor");
+                
                 return res.status(403).json("You are not an authorized distributor");
             }
             

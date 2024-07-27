@@ -21,7 +21,7 @@ exports.addProductToCart = async (req, res) => {
             res.status(404).json("Cart not found");
             return;
         }
-        console.log(cart);
+        
         
         const product = cart.products.find(p => p.productId.toString() === req.body.productId);
         if (product) {

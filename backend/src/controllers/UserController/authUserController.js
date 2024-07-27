@@ -15,7 +15,7 @@ exports.registerUser = async (req, res) => {
         confirm_password: CryptoJS.AES.encrypt(req.body.confirm_password, process.env.PASS_SECRET).toString(),
     });
     try {
-        console.log(newUser);
+        
         if(req.body.password !== req.body.confirm_password){
             res.status(400).json("Passwords do not match");
             return;
@@ -26,6 +26,11 @@ exports.registerUser = async (req, res) => {
         }
         
         const user = await newUser.save();
+        if(!user){
+            res.status(400).json("User not saved");
+            return;
+        }
+        
         const accessToken = jwt.sign({
             id: user._id,
             isAdmin: user.isAdmin,

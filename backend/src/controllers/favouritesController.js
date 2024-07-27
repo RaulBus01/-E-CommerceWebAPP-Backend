@@ -18,7 +18,7 @@ exports.addFavourites = async (req, res) => {
       res.status(404).json("Favourites list not found");
       return;
     }
-    console.log(favourites.products);
+  
 
 
     const product = favourites.products.find(p => p.productId.equals(req.body.productId));
