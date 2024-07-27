@@ -6,10 +6,16 @@ const FavouritesSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  products: {
-    type: Array,
-  },
-});
+  products: [
+    {
+        productId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Product',
+        },
+     
+    },
+],
+}, { timestamps: true });
 
 const Favourites = mongoose.model("Favourites", FavouritesSchema);
 module.exports = Favourites;

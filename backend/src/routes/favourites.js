@@ -1,12 +1,12 @@
-const { verifyTokenAndAuthorization, verifyTokenAndAdmin, verifyToken } = require('../middleware/verifyToken');
+const { verifyTokenAndAuthorization, verifyTokenAndAdmin } = require('../middleware/verifyToken');
 const router = require('express').Router();
 const favouritesController = require('../controllers/favouritesController');
 
 //CREATE
-router.post("/add", verifyTokenAndAuthorization, favouritesController.createFavourites);
+router.post("/create", verifyTokenAndAuthorization, favouritesController.createFavourites);
 
 //ADD
-router.put("/edit", verifyTokenAndAuthorization, favouritesController.addFavourites);
+router.put("/add", verifyTokenAndAuthorization, favouritesController.addFavourites);
 
 //DELETE PRODUCT FROM FAVOURITES
 router.delete("/deleteProduct", verifyTokenAndAuthorization, favouritesController.deleteProductFromFavourites);
