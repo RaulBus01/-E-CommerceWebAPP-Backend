@@ -30,6 +30,7 @@ exports.addReviewToProduct = async (req, res) => {
         const totalRating = reviews.reduce((accumulator, review) => accumulator + review.rating, 0);
         const newRating = reviews.length > 0 ? totalRating/reviews.length : 0;
         product.ratingProduct = newRating;
+        product.numberOfReviews = reviews.length;
         await product.save();
 
         res.status(200).json(product);
