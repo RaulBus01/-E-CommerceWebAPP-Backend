@@ -139,7 +139,7 @@ exports.editOrderStatus = async(req, res) => {
 
 exports.getOrder = async(req, res) => {
     try{
-        const order = await Order.findById(req.params.id);
+        const order = await Order.findById(req.params.id).populate('products.productId');
         res.status(200).json(order);
     } catch(error){
         res.status(500).json(error);
