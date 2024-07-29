@@ -1,4 +1,4 @@
-const { verifyToken,verifyTokenAndCancelOrderAuthorization, verifyTokenAndAdmin, verifyTokenAndAuthorization, verifyTokenAndEditOrderStatusAuthorization } = require('../middleware/verifyToken');
+const { verifyToken,verifyTokenAndCancelOrderAuthorization, verifyTokenAndAdmin, verifyTokenAndAuthorization, verifyTokenAndEditOrderStatusAuthorization, verifyTokendAndAssociatedDistributor } = require('../middleware/verifyToken');
 const orderController = require('../controllers/orderController');
 const verifyId = require('../middleware/verifyId');
 const router = require('express').Router();
@@ -13,6 +13,8 @@ router.get("/order/:id",verifyId,verifyToken, orderController.getOrder);
 router.get("/findAllOrders", verifyTokenAndAdmin, orderController.getAllOrders);
 //GET ORDERS BY USER(USER)
 router.get("/yourOrders/:id", verifyTokenAndAuthorization, orderController.getOrdersByUser);
+//GET ORDERS BY DISTRIBUTOR(DISTRIBUTOR)
+router.get("/distributorOrders/:id", verifyId,verifyTokendAndAssociatedDistributor, orderController.getOrdersByDistributor);
 //EDIT ORDER(DISTRIBUTOR)
 router.patch("/editOrderStatus/:id", verifyId,verifyTokenAndEditOrderStatusAuthorization, orderController.editOrderStatus);
 

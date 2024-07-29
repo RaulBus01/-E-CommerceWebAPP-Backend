@@ -16,7 +16,7 @@ exports.addReviewToProduct = async (req, res) => {
             res.status(400).json("You already reviewed this product!");
             return;
         }
-        //the new review
+      
         const newReview = new Review({
             productId,
             userId,
@@ -25,7 +25,6 @@ exports.addReviewToProduct = async (req, res) => {
         });
         await newReview.save();
         
-        //update product rating
         const reviews = await Review.find({productId});
         const totalRating = reviews.reduce((accumulator, review) => accumulator + review.rating, 0);
         const newRating = reviews.length > 0 ? totalRating/reviews.length : 0;

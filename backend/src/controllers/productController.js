@@ -47,6 +47,7 @@ exports.getAllProducts = async (req, res) => {
         res.status(500).json(err);
     }
 }
+
 exports.getProduct = async (req, res) => {
     try {
         const product = await Product.findById(req.params.id);
@@ -56,3 +57,13 @@ exports.getProduct = async (req, res) => {
         res.status(500).json(err);  
     }
 }
+exports.getProductsByDistributor = async (req, res) => {
+    try {
+        const products = await Product.find({ distributorId: req.params.id })
+        .populate('reviews')
+        res.status(200).json(products);
+    } catch (err) {
+        res.status(500).json(err);
+    }
+}
+

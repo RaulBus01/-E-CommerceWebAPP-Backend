@@ -145,3 +145,12 @@ exports.getOrder = async(req, res) => {
         res.status(500).json(error);
     }
 }
+exports.getOrdersByDistributor = async(req, res) => {
+    try{
+        const orders = await Order.find({distributorId: req.params.id});
+        res.status(200).json(orders);
+    } catch(error){
+        res.status(500).json(error);
+    }
+}
+

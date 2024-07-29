@@ -18,7 +18,8 @@ const replySchema = new mongoose.Schema({
     default: false
   }
   
-});
+}, {timestamps: true});
+
 const Reply  = mongoose.model('Reply', replySchema);
 module.exports = Reply;
 

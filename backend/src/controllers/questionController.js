@@ -1,5 +1,6 @@
 const Question = require('../models/Question');
 const Reply = require('../models/Reply');
+const Product = require('../models/Product');
 
 exports.addQuestion = async (req, res) => {
     
@@ -66,11 +67,9 @@ exports.deleteReply = async (req, res) => {
 }
 exports.getQuestion = async (req, res) => {
     try {
-        const questions = await Question.find({ productId: req.params.productId })
-            .populate({
-                path: 'replies',
-                options: { sort: { createdAt: -1 } } 
-            });
+      
+        const questions = await Question.find({ productId: req.params.productId }).populate("replies");
+           
         
         
         const processedQuestions = questions.map(question => ({
@@ -82,8 +81,11 @@ exports.getQuestion = async (req, res) => {
                 content: reply.content,
                 userId: reply.userId,
                 isDistributor: reply.isDistributor,
-                createdAt: reply.createdAt
-            }))
+                createdAt: reply.createdAt,
+                updatedAt: reply.updatedAt
+            })),
+            createdAt: question.createdAt,
+            updatedAt: question.updatedAt
 
         }));
 
@@ -92,5 +94,50 @@ exports.getQuestion = async (req, res) => {
     } catch (err) {
         console.error('Error fetching questions:', err);
         res.status(500).json({ message: 'Error fetching questions', error: err.message });
+    }
+}
+exports.getQuestionByUser = async (req, res) => {
+    try {
+        const questions = await Question.find({ userId: req.params.userId }).populate({
+            path: 'replies',
+            options: { sort: { createdAt: -1 } } 
+        });
+        const processedQuestions = questions.map(question => ({
+            id: question._id,
+            content: question.content,
+            userId: question.userId,
+            replies: question.replies.map(reply => ({
+                id: reply._id,
+                content: reply.content,
+                userId: reply.userId,
+                isDistributor: reply.isDistributor,
+                createdAt: reply.createdAt,
+                updatedAt: reply.updatedAt
+            })),
+            createdAt: question.createdAt,
+            updatedAt: question.updatedAt
+
+        
+
+        }));
+
+
+        res.status(200).json(processedQuestions);
+        
+    } catch (err) {
+        res.status(500).json(err);
+    }
+}
+exports.getQuestionByDistributor = async (req, res) => {
+    try {
+        const products = await Product.find({ distributorId: req.params.id });
+        const productIds = products.map(product => product._id);
+        const questions = await Question.find({ productId: { $in: productIds } }).populate("replies").sort({ createdAt: -1 });
+
+        console.log(questions);
+        res.status(200).json(questions);
+    }
+    catch (err) {
+        res.status(500).json(err);
     }
 }
