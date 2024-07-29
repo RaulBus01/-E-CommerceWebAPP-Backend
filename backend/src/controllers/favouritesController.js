@@ -18,16 +18,20 @@ exports.addFavourites = async (req, res) => {
       res.status(404).json("Favourites list not found");
       return;
     }
-  
+
 
 
     const product = favourites.products.find(p => p.product.equals(req.body.productId));
     if (product) {
       return res.status(400).json("Product already in favourites");
     }
-    favourites.products.push({ product: req.body.productId });
-    const updatedFavourites = await favourites.save();
-    res.status(200).json(updatedFavourites);
+    const newProduct = { product: req.body.productId };
+    favourites.products.push(newProduct);
+    const result =  await favourites.save();
+    if (!result) {
+      return res.status(400).json("Product not added to favourites");
+    }
+    res.status(200).json(newProduct);
 
   } catch (err) {
     res.status(500).json(err);
