@@ -17,6 +17,6 @@ router.get("/find/:id",verifyTokenAndAuthorization,cartController.getCart);
 // GET ALL CARTS
 router.get("/findAll",verifyTokenAndAdmin,cartController.getAllCarts);
 //EDIT QUANTITY IN CART
-router.patch("/edit",verifyTokenAndAuthorization,cartController.editProductQuantityInCart);
+router.put("/edit",verifyTokenAndAuthorization,cartController.editProductQuantityInCart);
 
 module.exports = router;    

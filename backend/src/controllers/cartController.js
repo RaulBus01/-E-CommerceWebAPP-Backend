@@ -129,26 +129,27 @@ exports.editProductQuantityInCart = async (req, res) => {
             res.status(404).json("Product not found in cart");
             return;
         }
+        console.log(req.body);
 
         if (req.body.quantity < 0) {
-            res.status(400).json("Quantity should be greater than 0");
-            return;
+            return res.status(400).json("Quantity should be greater than 0");
+            
         }
 
         if (req.body.quantity === 0) {
-            await Cart.updateOne(
-                { userId: req.body.id },
-                { $pull: { products: { productId: req.body.productId } } }
-            );
-            res.status(200).json("Product has been deleted from cart");
-            return;
+            cart.products = cart.products.filter(p => p.productId.toString() !== req.body.productId);
+            await cart.save();
+            return res.status(200).json("Product has been removed from cart");
         }
 
-        await Cart.updateOne(
-            { "products.productId": req.body.productId },
-            { $set: { "products.$.quantity": req.body.quantity } }
-        );
-        res.status(200).json("Product quantity has been updated in cart");
+       cart.products.map(p => {
+            if (p.productId.toString() === req.body.productId) {
+                p.quantity = req.body.quantity;
+            }
+            return p;
+        });
+        const updatedCart = await cart.save();
+        res.status(200).json(updatedCart);
     } catch (err) {
         res.status(500).json(err);
     }
