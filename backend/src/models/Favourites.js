@@ -8,7 +8,7 @@ const FavouritesSchema = new mongoose.Schema({
   },
   products: [
     {
-        productId: {
+        product: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Product',
         },

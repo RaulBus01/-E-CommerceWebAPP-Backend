@@ -21,11 +21,11 @@ exports.addFavourites = async (req, res) => {
   
 
 
-    const product = favourites.products.find(p => p.productId.equals(req.body.productId));
+    const product = favourites.products.find(p => p.product.equals(req.body.productId));
     if (product) {
       return res.status(400).json("Product already in favourites");
     }
-    favourites.products.push({ productId: req.body.productId });
+    favourites.products.push({ product: req.body.productId });
     const updatedFavourites = await favourites.save();
     res.status(200).json(updatedFavourites);
 
@@ -44,7 +44,7 @@ exports.deleteProductFromFavourites = async (req, res) => {
     }
 
 
-    await favourites.updateOne({ $pull: { products: { productId: req.body.productId } } });
+    await favourites.updateOne({ $pull: { products: { product: req.body.productId } } });
     res.status(200).json("Product has been deleted from favourites");
   } catch (err) {
     res.status(500).json(err);
@@ -73,7 +73,7 @@ exports.deleteAllFavourites = async (req, res) => {
 
 exports.getFavourites = async (req, res) => {
   try {
-    const favourites = await Favourites.findOne({ userId: req.params.id }).populate('products.productId');
+    const favourites = await Favourites.findOne({ userId: req.params.id }).populate('products.product');
 
     if (!favourites) {
       res.status(404).json("Favourites list not found");
@@ -86,7 +86,7 @@ exports.getFavourites = async (req, res) => {
 };
 exports.getAllFavourites = async (req, res) => {
   try {
-    const favourites = await Favourites.find().populate('products.productId');
+    const favourites = await Favourites.find().populate('products.product');
     res.json(favourites);
   } catch (err) {
     res.status(500).json({ message: err.message });
