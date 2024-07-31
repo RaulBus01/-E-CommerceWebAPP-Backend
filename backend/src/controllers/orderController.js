@@ -5,7 +5,9 @@ const User = require('../models/User');
 exports.createOrder = async (req, res) => {
     try {
         const products = req.body.products;
+        console.log(req.body.userId);
         const user = await User.findById(req.body.userId);
+        console.log(user);
         if (!user) {
             return res.status(400).json("User not found");
         }
@@ -20,18 +22,18 @@ exports.createOrder = async (req, res) => {
         const ordersByDistributor = new Map();
 
         for (const product of products) {
-            if (product.productId.length !== 24)
+            if (product.product.length !== 24)
             {
                 return res.status(400).json(`Product ID is not valid`);
             }
-            const checkProduct = await Product.findById(product.productId);
+            const checkProduct = await Product.findById(product.product);
             if (!checkProduct) {
-                return res.status(400).json(`Product not found: ${product.productId}`);
+                return res.status(400).json(`Product not found: ${product.product}`);
             }
 
             // Uncomment if you want to check stock
             if (checkProduct.stock < product.quantity) {
-                return res.status(400).json(`Product out of stock: ${product.productId}`);
+                return res.status(400).json(`Product out of stock: ${product.product}`);
             }
 
             const { price, distributorId } = checkProduct;
@@ -82,23 +84,28 @@ exports.createOrder = async (req, res) => {
 
 exports.cancelOrder = async(req, res) => {
     try{
-        const order = await Order.findById(req.params.orderId);
+        const order = await Order.findById(req.params.id);
         
         if(!order){
             res.status(404).json("Order not found");
             return;
         }
-        if (order.status === "delivered") {
+        if (order.status === "Delivered") {
             res.status(400).json("Order is already delivered");
             return;
         }
-        if (order.status === "cancelled") {
+        if (order.status === "Shipped") {
+            res.status(400).json("Order is already shipped");
+            return;
+        }
+        if (order.status === "Canceled") {
             res.status(400).json("Order is already cancelled");
             return;
         }
-        await order.updateOne({$set: {status: "cancelled"}});
+        order.status = "Canceled";
+        await order.save();
 
-        res.status(200).json("Order has been cancelled");
+        res.status(200).json({message: "Order canceled "});
     } catch(error){
         res.status(500).json(error);
     }
@@ -127,11 +134,25 @@ exports.getOrdersByUser = async(req, res) => {
 
 exports.editOrderStatus = async(req, res) => {
     try{
-        const editedOrder = await Order.findByIdAndUpdate(req.params.orderId,
-            {
-                $set: req.body,
-            }, {new: true});
-        res.status(200).json(editedOrder);
+        const order = await Order.findById(req.params.id);
+        if(!order){
+            res.status(404).json("Order not found");
+            return;
+        }
+        if(order.status === "delivered"){
+            res.status(400).json("Order is already delivered");
+            return;
+        }
+        if(order.status === "cancelled"){
+            res.status(400).json("Order is cancelled");
+            return;
+        }
+    
+        order.status = req.body.status;
+
+       const updatedOrder = await order.save();
+
+        res.status(200).json(updatedOrder);
     } catch(error){
         res.status(500).json(error);
     }
@@ -139,7 +160,7 @@ exports.editOrderStatus = async(req, res) => {
 
 exports.getOrder = async(req, res) => {
     try{
-        const order = await Order.findById(req.params.id).populate('products.productId');
+        const order = await Order.findById(req.params.id).populate('products.product');
         res.status(200).json(order);
     } catch(error){
         res.status(500).json(error);

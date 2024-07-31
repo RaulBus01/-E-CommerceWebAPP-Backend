@@ -131,7 +131,7 @@ const verifyTokenAndCancelOrderAuthorization = async (req, res, next) => {
     verifyToken(req, res, async () => {
         try {
             
-            const order = await Order.findById(req.params.orderId);
+            const order = await Order.findById(req.params.id);
           
             if (!order) {
                 return res.status(404).json("Order not found");
@@ -146,7 +146,7 @@ const verifyTokenAndCancelOrderAuthorization = async (req, res, next) => {
             if (req.user.isDistributor) {
                 
                
-                const product = await Product.findById(order.products[0].productId);
+                const product = await Product.findById(order.products[0].product);
 
                 const isAssociatedDistributor = product.distributorId === req.user.id;
 
@@ -167,12 +167,13 @@ const verifyTokenAndCancelOrderAuthorization = async (req, res, next) => {
 const verifyTokenAndEditOrderStatusAuthorization = async (req, res, next) => {
     verifyToken(req, res, async () => {
         try {
-            const order = await Order.findById(req.params.orderId);
+        
+            const order = await Order.findById(req.params.id); 
             if (!order) {
                 return res.status(404).json("Order not found");
             }
             if (req.user.isDistributor) {
-                const product = await Product.findById(order.products[0].productId);
+                const product = await Product.findById(order.products[0].product);
                 const isAssociatedDistributor = product.distributorId === req.user.id;
                 if (isAssociatedDistributor) {
                     return next();
@@ -283,10 +284,34 @@ const verifyTokenAndReplyAuthorization = (req, res, next) => {
             res.status(500).json({ error: err.message });
         }
     });
+   
+    
 }
+const verifyOrderOwnership = async (req, res, next) => {
+    const userId = req.user.id; 
+    const orderId = req.params.id;
+ 
+
+    try {
+        const order = await Order.findById(orderId); 
+      
+
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        if (order.userId.toString() === userId || order.distributorId.toString() === userId) {
+            return next();
+        }
+
+        res.status(403).json({ message: 'Access denied' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
 
 
 
 
-
-module.exports = {verifyToken, verifyTokenAndAuthorization,verifyTokenAndAdmin,verifyTokenAndDistributor,verifyTokenAndEditProductAuthorization,verifyTokenAndCancelOrderAuthorization,verifyTokenAndEditOrderStatusAuthorization, verifyTokenAndEditDistributorAuthorization, verifyTokenAndUserAuthorization, verifyTokenAndReplyAuthorization,verifyTokenAndAuthorizedDistributor,verifyTokendAndAssociatedDistributor}
+module.exports = {verifyToken, verifyTokenAndAuthorization,verifyTokenAndAdmin,verifyTokenAndDistributor,verifyTokenAndEditProductAuthorization,verifyTokenAndCancelOrderAuthorization,verifyTokenAndEditOrderStatusAuthorization, verifyTokenAndEditDistributorAuthorization, verifyTokenAndUserAuthorization, verifyTokenAndReplyAuthorization,verifyTokenAndAuthorizedDistributor,verifyTokendAndAssociatedDistributor,verifyOrderOwnership};

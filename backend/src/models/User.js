@@ -2,11 +2,7 @@ const mongoose = require('mongoose');
 
 
 const userSchema = new mongoose.Schema({
-    first_name: {
-        type: String,
-        required: true,
-    },
-    last_name: {
+    name: {
         type: String,
         required: true,
     },
@@ -19,46 +15,16 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    confirm_password: {
+  
+    role:{
         type: String,
         required: true,
     },
     phoneNumber: {
         type: String,
         required: false,
-    },
-    address: {
-        country: {
-            type: String,
-            required: false,
-        },
-        county:{
-            type: String,
-            required: false,
-        },
-        city: {
-            type: String,
-            required: false,
-        },
-        street: {
-            type: String,
-            required: false,
-        },
-        number: {
-            type: String,
-            required: false,
-        },
-        zip: {
-            type: String,
-            required: false,
-        },
-
-
-    },
-    isVerified: {
-        type: Boolean,
-        default: false,
     }
+    
 
     }, {timestamps: true});
 

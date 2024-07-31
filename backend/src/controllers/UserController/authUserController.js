@@ -1,5 +1,7 @@
 
 const User = require('../../models/User');
+const Cart = require('../../models/Cart');
+const Favourites = require('../../models/Favourites');
 const CryptoJS = require('crypto-js');
 const UserVerificationToken = require('../../models/UserVerificationToken');
 const crypto = require('crypto');
@@ -37,6 +39,18 @@ exports.registerUser = async (req, res) => {
         }, process.env.JWT_SECRET, {expiresIn: "3d"});
 
         const {password, confirm_password, ...others} = user._doc;
+        const newCart = new Cart({ userId: user._id, products: [] });
+        const savedCart = await newCart.save();
+        if(!savedCart){
+            res.status(400).json("Cart not saved");
+            return;
+        }
+        const newFavourites = new Favourites({ products: [], userId: user._id });
+        const savedFavourites = await newFavourites.save();
+        if(!savedFavourites){
+            res.status(400).json("Favourites not saved");
+            return;
+        }
 
       
         const verificationToken = new UserVerificationToken({
