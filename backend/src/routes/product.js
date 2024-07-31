@@ -14,8 +14,11 @@ router.delete("/delete",verifyId, verifyTokenAndEditProductAuthorization, produc
 router.get("/find/:id",verifyId,productController.getProduct);
 // GET ALL PRODUCTS
 router.get("/findAll", productController.getAllProducts);
+//GET PRODUCTS BY CATEGORY
+router.get("/findCategory/:category", productController.getProductsByCategory);
 //GET PRODUCTS BY DISTRIBUTOR
 router.get("/findDistributor/:id",verifyId, verifyTokenAndDistributor, productController.getProductsByDistributor);
+
 
 
 

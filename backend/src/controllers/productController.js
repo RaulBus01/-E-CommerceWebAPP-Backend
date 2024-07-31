@@ -57,6 +57,19 @@ exports.getProduct = async (req, res) => {
         res.status(500).json(err);  
     }
 }
+exports.getProductsByCategory = async (req, res) => {
+    try {
+        const products = await Product.find({
+            category: {
+                $in: [req.params.category],
+            },
+        });
+        res.status(200).json(products);
+    } catch (err) {
+        res.status(500).json(err);
+    }
+}
+
 exports.getProductsByDistributor = async (req, res) => {
     try {
         const products = await Product.find({ distributorId: req.params.id })
@@ -66,4 +79,3 @@ exports.getProductsByDistributor = async (req, res) => {
         res.status(500).json(err);
     }
 }
-
