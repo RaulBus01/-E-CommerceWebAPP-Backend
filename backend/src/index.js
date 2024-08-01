@@ -14,6 +14,7 @@ const favouritesRoutes = require('./routes/favourites');
 const reviewsRoutes = require('./routes/review');
 const questionRoutes = require('./routes/question');
 const paymentRoutes = require('./routes/stripe');
+const categoriesRoutes = require('./routes/categories');
 const dotenv = require('dotenv');
 const cors = require('cors');
 
@@ -37,6 +38,7 @@ app.use("/api/question",questionRoutes);
 app.use("/api/favourites",favouritesRoutes);
 app.use("/api/reviews", reviewsRoutes);
 app.use("/api/payment", paymentRoutes);
+app.use("/api", categoriesRoutes);
 
 
 app.listen(process.env.PORT, () => {

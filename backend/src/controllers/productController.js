@@ -1,3 +1,4 @@
+const Category = require('../models/Category');
 const Product = require('../models/Product');
 const Review = require('../models/Review');
 
@@ -5,6 +6,12 @@ exports.createProduct = async (req, res) => {
 
     const newProduct = new Product(req.body);
     try {
+        const categoryExists = await Category.findById(req.body.categories);
+        if (!categoryExists) {
+            return res.status(400).json("Category does not exist");
+        }
+        
+    
         const savedProduct = await newProduct.save();
         res.status(200).json(savedProduct);
     } catch (err) {
@@ -42,7 +49,7 @@ exports.deleteProduct = async (req, res) => {
 }
 exports.getAllProducts = async (req, res) => {
     try {
-        const products = await Product.find().populate("distributor", "name");
+        const products = await Product.find().populate("distributor", "name").populate("categories", "name");
         res.status(200).json(products);
     } catch (err) {
         res.status(500).json(err);

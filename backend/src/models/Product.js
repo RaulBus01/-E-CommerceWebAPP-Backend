@@ -9,10 +9,11 @@ const productSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
-    category: {
-        type: [String]
-        
-    },
+    categories: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Category',
+        required: true,
+    }], 
     description: {
         type: String,
         required: true,
@@ -57,3 +58,10 @@ productSchema.virtual('questions',{
 
 const Product = mongoose.model('Product', productSchema);
 module.exports = Product;
+
+// const subcategories = await Category.find({ parent: someCategory._id });
+//const categoryAndSubcategories = await Category.find({
+//     $or: [{ _id: someCategory._id }, { parent: someCategory._id }]
+// });
+// const categoryIds = categoryAndSubcategories.map(cat => cat._id);
+// const products = await Product.find({ categories: { $in: categoryIds } });
