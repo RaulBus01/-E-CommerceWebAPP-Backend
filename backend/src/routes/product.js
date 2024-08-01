@@ -7,17 +7,17 @@ const verifyId = require("../middleware/verifyId");
 //CREATE
 router.post("/add", verifyTokenAndAuthorizedDistributor,productController.createProduct); 
 //UPDATE
-router.put("/edit", verifyId,verifyTokenAndEditProductAuthorization,productController.updateProduct);
+router.put("/edit", verifyTokenAndEditProductAuthorization,productController.updateProduct);
 //DELETE
-router.delete("/delete",verifyId, verifyTokenAndEditProductAuthorization, productController.deleteProduct);
+router.delete("/delete", verifyTokenAndEditProductAuthorization, productController.deleteProduct);
 //GET PRODUCT BY ID
-router.get("/find/:id",verifyId,productController.getProduct);
+router.get("/find/:id", productController.getProduct);
 // GET ALL PRODUCTS
 router.get("/findAll", productController.getAllProducts);
 //GET PRODUCTS BY CATEGORY
 router.get("/findCategory/:category", productController.getProductsByCategory);
 //GET PRODUCTS BY DISTRIBUTOR
-router.get("/findDistributor/:id",verifyId, verifyTokenAndDistributor, productController.getProductsByDistributor);
+router.get("/findDistributor/:id", verifyTokenAndDistributor, productController.getProductsByDistributor);
 
 
 
