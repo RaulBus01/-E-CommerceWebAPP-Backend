@@ -1,7 +1,7 @@
 const { verifyTokenAndDistributor,verifyTokenAndEditProductAuthorization, verifyTokenAndAuthorizedDistributor } = require("../middleware/verifyToken");
 const router = require("express").Router();
 const productController = require("../controllers/productController");
-const verifyId = require("../middleware/verifyId");
+
 
 
 //CREATE

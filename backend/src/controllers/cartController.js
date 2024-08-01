@@ -1,12 +1,23 @@
 const Cart = require('../models/Cart');
 
+exports.createCart = async (req, res) => {
+    try {
+        const newCart = new Cart({ user: req.body.id });
+        const savedCart = await newCart.save();
+        res.status(200).json(savedCart);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+}
+
 
 
 exports.addProductToCart = async (req, res) => {
     try {
-        const cart = await Cart.findOne({ userId: req.body.id });
+        console.log(req.user.id);
+        const cart = await Cart.findOne({ user: req.user.id });
         if (!cart) {
-            res.status(404).json("Cart not found");
+            res.status(404).json({message: "Cart not found"});
             return;
         }
         
@@ -17,7 +28,7 @@ exports.addProductToCart = async (req, res) => {
                 { "products.product": req.body.productId },
                 { $inc: { "products.$.quantity": req.body.quantity } }
             );
-            res.status(200).json("Product has been updated in cart");
+            res.status(200).json({ message: "Product quantity has been updated" });
             return;
         }
 
@@ -27,69 +38,70 @@ exports.addProductToCart = async (req, res) => {
         });
 
         const updatedCart = await cart.save();
-        res.status(200).json(updatedCart);
+        res.status(200).json({message: "Product has been added to cart", updatedCart});
+
     } catch (err) {
-        res.status(500).json(err);
+        res.status(500).json({ message: err.message });
     }
 };
 
 exports.deleteProductFromCart = async (req, res) => {
     try {
-        const cart = await Cart.findOne({ userId: req.body.id });
+        const cart = await Cart.findOne({ user: req.user.id });
 
         if (!cart) {
-            res.status(404).json("Cart not found");
+            res.status(404).json({ message: "Cart not found" });
             return;
         }
 
         const product = cart.products.find(p => p.product.toString() === req.body.productId);
         if (!product) {
-            res.status(404).json("Product not found in cart");
+            res.status(404).json({ message: "Product not found in cart" });
             return;
         }
 
         await Cart.updateOne(
-            { userId: req.body.id },
+            { user: req.user.id },
             { $pull: { products: { product: req.body.productId } } }
         );
-        res.status(200).json("Product has been deleted from cart");
+        res.status(200).json({message: "Product has been deleted from cart"});
     } catch (err) {
-        res.status(500).json(err);
+        res.status(500).json({ message: err.message });
     }
 };
 
 exports.deleteCart = async (req, res) => {
     try {
-        const cart = await Cart.findOne({ userId: req.body.id });
+        const cart = await Cart.findOne({ userId: req.user.id });
 
         if (!cart) {
-            res.status(404).json("Cart not found");
+            res.status(404).json({ message: "Cart not found" });
             return;
         }
 
         if (cart.products.length === 0) {
-            res.status(400).json("Cart is already empty");
+            res.status(400).json({ message: "Cart is already empty" });
             return;
         }
 
         cart.products = [];
         await cart.save();
-        res.status(200).json("Cart has been emptied");
+        res.status(200).json({ message: "Cart has been deleted" });
     } catch (err) {
-        res.status(500).json(err);
+        res.status(500).json({ message: err.message });
     }
 };
 
 exports.getCart = async (req, res) => {
     try {
-        const cart = await Cart.findOne({ userId: req.params.id }).populate('products.product');
+        const cart = await Cart.findOne({ user: req.user.id }).populate('products.product');
 
         if (!cart) {
-            res.status(404).json("Cart not found");
+            res.status(404).json({ message: "Cart not found" });
             return;
         }
 
-        res.json(cart.products);
+        res.json({message: "Cart found", cart});
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -98,7 +110,7 @@ exports.getCart = async (req, res) => {
 exports.getAllCarts = async (req, res) => {
     try {
         const carts = await Cart.find().populate('products.product');
-        res.json(carts);
+        res.json({message: "All carts found", carts});
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -106,27 +118,27 @@ exports.getAllCarts = async (req, res) => {
 
 exports.editProductQuantityInCart = async (req, res) => {
     try {
-        const cart = await Cart.findOne({ userId: req.body.id });
+        const cart = await Cart.findOne({ user: req.user.id });
         if (!cart) {
-            res.status(404).json("Cart not found");
+            res.status(404).json({ message: "Cart not found" });
             return;
         }
 
         const product = cart.products.find(p => p.product.toString() === req.body.productId);
         if (!product) {
-            res.status(404).json("Product not found in cart");
+            res.status(404).json({ message: "Product not found in cart" });
             return;
         }
 
         if (req.body.quantity < 0) {
-            return res.status(400).json("Quantity should be greater than 0");
+            return res.status(400).json({ message: "Quantity can't be less than 0" });
             
         }
 
         if (req.body.quantity === 0) {
             cart.products = cart.products.filter(p => p.product.toString() !== req.body.productId);
             await cart.save();
-            return res.status(200).json("Product has been removed from cart");
+            return res.status(200).json({ message: "Product has been deleted from cart" });
         }
 
        cart.products.map(p => {
@@ -136,8 +148,8 @@ exports.editProductQuantityInCart = async (req, res) => {
             return p;
         });
         const updatedCart = await cart.save();
-        res.status(200).json(updatedCart);
+        res.status(200).json({ message: "Product quantity has been updated", updatedCart });
     } catch (err) {
-        res.status(500).json(err);
+        res.status(500).json({ message: err.message });
     }
 };

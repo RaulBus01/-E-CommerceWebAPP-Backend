@@ -28,7 +28,7 @@ const verifyToken = (req, res, next) => {
 }
 const verifyTokenAndAuthorization = (req, res, next) => {
     verifyToken(req, res, () => {
-        const userId = req.params.id || req.body.id || req.body.userId;
+        const userId = req.params.id || req.body.id || req.body.userId || req.body.user;
 
         if (req.user.id === userId)
         {
@@ -134,11 +134,12 @@ const verifyTokenAndCancelOrderAuthorization = async (req, res, next) => {
             }
             if (req.user.role === "distributor") {
                 
-                if (order.distributorId === req.user.id) {
+                if (order.distributor === req.user.id) {
                     return next();
                 }
             }
-            if (req.user.id === order.userId) {
+           
+            if (req.user.id === order.user.toString()) {
                 return next();
             }
             res.status(403).json("You are not authorized to cancel this order");

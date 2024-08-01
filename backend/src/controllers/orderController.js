@@ -5,9 +5,8 @@ const User = require('../models/User');
 exports.createOrder = async (req, res) => {
     try {
         const products = req.body.products;
-      
-        const user = await User.findById(req.body.id).populate('customerInfo');
-       
+        const user = await User.findById(req.user.id).populate('customerInfo');
+     
         if (!user) {
             return res.status(400).json("User not found");
         }
@@ -15,43 +14,44 @@ exports.createOrder = async (req, res) => {
             return res.status(400).json("User is not verified");
         }
         if (!products || products.length === 0) {
-            return res.status(400).json("No products in cart");
+            return res.status(400).json("No products in cart"); 
         }
 
         let totalPrice = 0;
         const ordersByDistributor = new Map();
 
         for (const product of products) {
-            if (product.product.length !== 24)
+            console.log(product);
+            if (product.productId.length !== 24)
             {
                 return res.status(400).json(`Product ID is not valid`);
-            }
-            const checkProduct = await Product.findById(product.product);
+            }   
+            const checkProduct = await Product.findById(product.productId);
             if (!checkProduct) {
-                return res.status(400).json(`Product not found: ${product.product}`);
+                return res.status(400).json(`Product not found: ${product.productId}`);
             }
 
             
             if (checkProduct.stock < product.quantity) {
-                return res.status(400).json(`Product out of stock: ${product.product}`);
+                return res.status(400).json(`Product out of stock: ${product.productId}`);
             }
 
-            const { price, distributorId } = checkProduct;
+            const { price, distributor } = checkProduct;
             totalPrice += price * product.quantity;
 
-            if (!ordersByDistributor.has(distributorId)) {
-                ordersByDistributor.set(distributorId, {
+            if (!ordersByDistributor.has(distributor)) {
+                ordersByDistributor.set(distributor, {
                     products: [],
                     totalPrice: 0
                 });
             }
             
-            ordersByDistributor.get(distributorId).products.push(product);
-            ordersByDistributor.get(distributorId).totalPrice += price * product.quantity;
+            ordersByDistributor.get(distributor).products.push(product);
+            ordersByDistributor.get(distributor).totalPrice += price * product.quantity;
         }
 
         const orders = [];
-        for (const [distributorId, orderData] of ordersByDistributor) {
+        for (const [distributor, orderData] of ordersByDistributor) {
             const newOrder = new Order({
                 user: req.user.id,
                 products: orderData.products,
@@ -67,7 +67,7 @@ exports.createOrder = async (req, res) => {
                     zip: req.body.address.zip,
                 },
                 totalPrice: orderData.totalPrice,
-                distributor: distributorId,
+                distributor: distributor,
             });
             orders.push(await newOrder.save());
         }

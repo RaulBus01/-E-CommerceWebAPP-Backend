@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const reviewController = require('../controllers/reviewController');
-const verifyId = require('../middleware/verifyId');
+
 const { verifyToken, verifyTokenAndAdmin, verifyTokenAndAuthorization, verifyTokenAndCustomer } = require("../middleware/verifyToken");
 
 //ADD REVIEW
@@ -10,6 +10,6 @@ router.get("/getReviewsForProduct/:productId", reviewController.getReviewsByProd
 //GET REVIEWS
 router.get("/getReviews", verifyToken, reviewController.getReviews);
 //DELETE REVIEW
-router.delete("/deleteReview", verifyId, verifyTokenAndAdmin, reviewController.deleteReview);
+router.delete("/deleteReview",verifyTokenAndAdmin, reviewController.deleteReview);
 
 module.exports = router;

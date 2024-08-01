@@ -1,19 +1,20 @@
-const { verifyTokenAndAuthorization, verifyTokenAndAdmin } = require('../middleware/verifyToken');
+const { verifyTokenAndAuthorization, verifyTokenAndAdmin,verifyToken } = require('../middleware/verifyToken');
 const router = require('express').Router();
 const favouritesController = require('../controllers/favouritesController');
 
-
+//CREATE
+router.post("/create", verifyTokenAndAdmin, favouritesController.createFavourites);
 //ADD
-router.put("/add", verifyTokenAndAuthorization, favouritesController.addFavourites);
+router.put("/add",verifyToken, favouritesController.addFavourites);
 
 //DELETE PRODUCT FROM FAVOURITES
-router.delete("/deleteProduct", verifyTokenAndAuthorization, favouritesController.deleteProductFromFavourites);
+router.delete("/deleteProduct", verifyToken, favouritesController.deleteProductFromFavourites);
 
 //DELETE FAVOURITES LIST
-router.delete("/deleteAll", verifyTokenAndAuthorization, favouritesController.deleteAllFavourites);
+router.delete("/deleteAll", verifyToken, favouritesController.deleteAllFavourites);
 
 //GET FAVOURITES BY USER ID
-router.get("/find/:id", verifyTokenAndAuthorization, favouritesController.getFavourites);
+router.get("/find", verifyToken, favouritesController.getFavourites);
 
 //GET ALL FAVOURITES
 router.get("/findAll", verifyTokenAndAdmin, favouritesController.getAllFavourites);

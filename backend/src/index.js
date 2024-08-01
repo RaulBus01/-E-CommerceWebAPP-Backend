@@ -1,10 +1,8 @@
 const express = require('express');
 const database = require('./config/database'); 
 const authUserRoute = require('./routes/auth/authUser');
-
-
 const userRoutes = require('./routes/user');
-const adminRoutes = require('./routes/admin');
+
 
 const productRoutes = require('./routes/product');
 const orderRoutes = require('./routes/order');
