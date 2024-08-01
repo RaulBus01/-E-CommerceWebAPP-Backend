@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 
 const OrderSchema= new mongoose.Schema({
-    userId: {
+    user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true,
@@ -23,7 +23,7 @@ const OrderSchema= new mongoose.Schema({
     status: {
         type: String,
         required: true,
-        enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled'],
+        enum: ['Pending','Processing','Shipped', 'Delivered', 'Cancelled'],
         default: 'Pending',
     },
      name: {
@@ -68,7 +68,7 @@ const OrderSchema= new mongoose.Schema({
         type: Number,
         required: true,
     },
-    distributorId: {
+    distributor: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true,

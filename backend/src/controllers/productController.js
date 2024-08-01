@@ -14,18 +14,18 @@ exports.createProduct = async (req, res) => {
 }
 exports.updateProduct = async (req, res) => {
     try {
-        const updatedProduct = await Product.findByIdAndUpdate(req.body.id, {
-            $set: req.body,
-        }, { new: true });
-        if(req.body.distributorId){
-            res.status(403).json("You are not authorized to edit this field");
-            return;
-        }
-        if (!updatedProduct) {
+        const product = await Product.findById(req.body.id);
+        if(!product){
             res.status(404).json("Product not found");
             return;
         }
-        res.status(200).json(updatedProduct);
+        const updatedProduct = product.updateOne({
+            $set: req.body,
+        });
+
+
+        const savedProduct = await updatedProduct.save();
+        res.status(200).json(savedProduct);
     } catch (err) {
         res.status(500).json(err);
     }

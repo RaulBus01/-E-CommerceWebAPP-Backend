@@ -9,15 +9,15 @@ router.post("/createOrder",verifyTokenAndCustomer, verifyTokenAndAuthorization, 
 router.put("/cancelOrder/:id",verifyId, verifyTokenAndCancelOrderAuthorization, orderController.cancelOrder);
 
 
-//GET ORDER BY ID(USER)
-router.get("/order/:id",verifyId, verifyTokenAndAuthorization, orderController.getOrder);
+//GET ORDER BY ID
+router.get("/order/:id",verifyId,verifyToken, orderController.getOrderDetails);
 //GET ALL ORDERS(ADMIN)
-router.get("/findAllOrders", verifyTokenAndAdmin, orderController.getAllOrders);
+router.get("/findOrders", verifyToken, orderController.getOrdersByUser);
 //GET ORDERS BY USER(USER)
 // router.get("/yourOrders/:id", verifyTokenAndAuthorization, orderController.getOrdersByUser);
 //GET ORDERS BY DISTRIBUTOR(DISTRIBUTOR)
 // router.get("/distributorOrders/:id", verifyId,verifyTokendAndAssociatedDistributor, orderController.getOrdersByDistributor);
 //EDIT ORDER(DISTRIBUTOR)
-// router.put("/editOrderStatus/:id", verifyId,verifyTokenAndEditOrderStatusAuthorization, orderController.editOrderStatus);
+router.put("/editOrderStatus/:id",verifyTokenAndEditOrderStatusAuthorization, orderController.editOrderStatus);
 
 module.exports = router;

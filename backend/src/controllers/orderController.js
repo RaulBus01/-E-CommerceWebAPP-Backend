@@ -31,7 +31,7 @@ exports.createOrder = async (req, res) => {
                 return res.status(400).json(`Product not found: ${product.product}`);
             }
 
-            // Uncomment if you want to check stock
+            
             if (checkProduct.stock < product.quantity) {
                 return res.status(400).json(`Product out of stock: ${product.product}`);
             }
@@ -53,7 +53,7 @@ exports.createOrder = async (req, res) => {
         const orders = [];
         for (const [distributorId, orderData] of ordersByDistributor) {
             const newOrder = new Order({
-                userId: req.body.id,
+                user: req.user.id,
                 products: orderData.products,
                 name: req.body.name,
                 email: req.user.email,
@@ -67,112 +67,148 @@ exports.createOrder = async (req, res) => {
                     zip: req.body.address.zip,
                 },
                 totalPrice: orderData.totalPrice,
-                distributorId: distributorId,
+                distributor: distributorId,
             });
             orders.push(await newOrder.save());
         }
 
         res.status(201).json({
             message: "Orders created successfully",
+            orders,
         });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ message: "An error occurred", error: err.message });
     }
 };
 
-exports.cancelOrder = async(req, res) => {
-    try{
+
+const getValidStatuses = (role) => {
+    switch(role) {
+        case 'admin':
+            return ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
+        case 'distributor':
+            return ['Shipped', 'Delivered'];
+        default:
+            return [];
+    }
+};
+const checkOrderStatus = (order, res) => {
+    if (["Delivered", "Cancelled"].includes(order.status)) {
+        const message = order.status === "Delivered" 
+            ? "Order is already delivered" 
+            : "Order is cancelled";
+        res.status(400).json({ message });
+        return false;
+    }
+    return true;
+};
+exports.cancelOrder = async (req, res) => {
+    try {
         const order = await Order.findById(req.params.id);
+        if (!order) {
+            return res.status(404).json({ message: "Order not found" });
+        }
         
-        if(!order){
-            res.status(404).json("Order not found");
+        if (!checkOrderStatus(order, res)) {
             return;
-        }
-        if (order.status === "Delivered") {
-            return res.status(400).json("Order is already delivered");
-           
-        }
-        if (order.status === "Shipped") {
-            return res.status(400).json("Order is already shipped");
-           
-        }
-        if (order.status === "Cancelled") {
-            return res.status(400).json("Order is already cancelled");
-           
         }
         order.status = "Cancelled";
         await order.save();
 
-        res.status(200).json({message: "Order cancelled "});
-    } catch(error){
-        res.status(500).json(error);
+        res.status(200).json({ message: "Order cancelled successfully" });
+    } catch (error) {
+        res.status(500).json({ message: "An error occurred", error: error.message });
     }
-}
+};
 
-exports.getAllOrders = async(req, res) => {
-    try{
-     
-        const orders = await Order.find();
-        
-        res.status(200).json(orders);
-    } catch(error){
-        res.status(500).json(error);
-        
-    }
-}
-
-
-
-exports.editOrderStatus = async(req, res) => {
-    try{
+exports.editOrderStatus = async (req, res) => {
+    try {
         const order = await Order.findById(req.params.id);
-        if(!order){
-            res.status(404).json("Order not found");
+        if (!order) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+       
+        if (!checkOrderStatus(order, res)) {
             return;
         }
-        if(order.status === "delivered"){
-            res.status(400).json("Order is already delivered");
-            return;
+
+
+        const validStatuses = getValidStatuses(req.user.role);
+        if (!validStatuses.includes(req.body.status)) {
+            return res.status(400).json({ message: "Invalid status" });
         }
-        if(order.status === "cancelled"){
-            res.status(400).json("Order is cancelled");
-            return;
+        
+        if (!validStatuses.includes(req.body.status)) {
+            return res.status(400).json({ message: "Invalid status" });
         }
-    
+        
+
         order.status = req.body.status;
+        const updatedOrder = await order.save();
 
-       const updatedOrder = await order.save();
-
-        res.status(200).json(updatedOrder);
-    } catch(error){
-        res.status(500).json(error);
+        res.status(200).json({ message: "Order status updated successfully", order: updatedOrder });
+    } catch (error) {
+        res.status(500).json({ message: "An error occurred", error: error.message });
     }
-}
+};
 
-exports.getOrder = async(req, res) => {
+exports.getOrderDetails = async(req, res) => {
     try{
-        const order = await Order.findById(req.params.id).populate('products.product');
+        const order = await Order.findById(req.params.id).populate('products.product').populate('user').populate('distributor');
+        
         if(!order){
-            return res.status(404).json("Order not found");
+            return res.status(404).json({message:"Order not found"});
             
         }
+       
         if(req.user.role === 'admin'){
-            return res.status(200).json(order);
+            return res.status(200).json({message:"Order found",order});
         }
-        if(order.userId !== req.user.id || order.distributorId !== req.user.id){
-            return res.status(401).json("You are not authorized to view this order");
+       
+        if (req.user.role === 'customer' && order.user.id !== req.user.id) {
+            return res.status(401).json({message:"You are not authorized to view this order"});
         }
-        res.status(200).json(order);
+        if(req.user.role === 'distributor' && order.distributor.id !== req.user.id){
+            return res.status(401).json({message:"You are not authorized to view this order"});
+        }
+        const {name,role} = order.user._doc;
+        order.user = {name,role};
+
+        res.status(200).json({message:"Order found",order});
     } catch(error){
-        res.status(500).json(error);
+        res.status(500).json({message:"An error occurred",error:error.message});
     }
 }
-exports.getOrdersByDistributor = async(req, res) => {
+exports.getOrdersByUser = async(req, res) => {
     try{
-        const orders = await Order.find({distributorId: req.params.id});
-        res.status(200).json(orders);
-    } catch(error){
-        res.status(500).json(error);
+        let orders;
+        if(req.user.role === 'admin'){
+            orders = await Order.find().populate('products.product').populate('user').populate('distributor');
+          
+        }
+        if(req.user.role === 'customer'){
+            orders = await Order.find({user: req.user.id}).populate('products.product').populate('user').populate('distributor');
+           
+        }
+        if(req.user.role === 'distributor'){
+            orders = await Order.find({distributor: req.user.id}).populate('products.product').populate('user').populate('distributor');
+            
+        }
+        if (orders.length === 0) {
+            return res.status(404).json({message:"No orders found"});
+        }
+        if (orders.length > 1) {
+            orders.map(order =>{
+                const {name,role} = order.user._doc;
+                order.user = {name,role};
+                return order;
+            })
+        }
+        res.status(200).json({message:"Orders found",orders});
     }
+    catch(error){
+        res.status(500).json({message:"An error occurred",error:error.message});
+    }
+
 }
 

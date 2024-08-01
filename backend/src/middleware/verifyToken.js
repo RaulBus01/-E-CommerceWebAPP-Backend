@@ -10,14 +10,14 @@ const verifyToken = (req, res, next) => {
   
     if (!authHeader)
     {
-        return res.status(401).json("You are not authenticated");
+        return res.status(401).json({message:"You are not authenticated"});
     }
     const token = authHeader.split(" ")[1];
 
     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
         if (err)
         {
-            return res.status(403).json("Token is not valid");
+            return res.status(403).json({message:"Token is not valid"});
         }
         
         req.user = user;
@@ -30,13 +30,12 @@ const verifyToken = (req, res, next) => {
 const verifyTokenAndAuthorization = (req, res, next) => {
     verifyToken(req, res, () => {
         const userId = req.params.id || req.body.id;
-
         if (req.user.id === userId)
         {
             next();
         } else
         {
-            res.status(403).json("You can only update your account");
+            res.status(403).json({message:"You are not authorized to do this" });
         }
     });
 }
@@ -47,7 +46,7 @@ const verifyTokenAndCustomer = (req, res, next) => {
             next();
         } else
         {
-            res.status(403).json("You are not a customer");
+            res.status(403).json({message:"You are not a customer"});
         }
 
     });
@@ -60,7 +59,7 @@ const verifyTokenAndAdmin = (req, res, next) => {
             next();
         } else
         {
-            res.status(403).json("You are not admin");
+            res.status(403).json({message:"You are not an admin"});
         }
     });
 }
@@ -73,7 +72,7 @@ const verifyTokenAndDistributor = async (req, res, next) => {
             next();
         } else
         {
-            res.status(403).json("You are not an authorized distributor");
+            res.status(403).json({message:"You are not a distributor"});
         }
     });
 }
@@ -161,23 +160,32 @@ const verifyTokenAndCancelOrderAuthorization = async (req, res, next) => {
 const verifyTokenAndEditOrderStatusAuthorization = async (req, res, next) => {
     verifyToken(req, res, async () => {
         try {
-        
-            const order = await Order.findById(req.params.id); 
-            if (!order) {
-                return res.status(404).json("Order not found");
+          
+            if(req.user.role === "admin")
+            {
+                return next();
             }
-            if (req.user.isDistributor) {
-                const product = await Product.findById(order.products[0].product);
-                const isAssociatedDistributor = product.distributorId === req.user.id;
-                if (isAssociatedDistributor) {
-                    return next();
+            if(req.user.role === "distributor")
+            {
+                const order = await Order.findById(req.params.id).populate('distributor');
+                console.log(order);
+                if (!order) {
+                    return res.status(404).json({message:"Order not found"});
+                }
+                if (order.distributor === req.user.id) {
+                    next();
                 }
             }
-            res.status(403).json("You are not authorized to edit this order");
-        } catch (err) {
-            res.status(500).json({ error: err.message });
+            res.status(403).json({message:"You are not authorized to edit this order"});
+        }
+        catch (err) {
+            res.status(500).json({ message:"An error occurred",error: err.message });
         }
     });
+
+
+        
+          
 }
 const verifyTokenAndEditProductAuthorization = (req, res, next) => {
     verifyToken(req, res, async () => {
