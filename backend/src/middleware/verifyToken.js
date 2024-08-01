@@ -21,7 +21,6 @@ const verifyToken = (req, res, next) => {
         }
         
         req.user = user;
-        console.log(req.user);
         next();
     });
 
@@ -29,7 +28,8 @@ const verifyToken = (req, res, next) => {
 }
 const verifyTokenAndAuthorization = (req, res, next) => {
     verifyToken(req, res, () => {
-        const userId = req.params.id || req.body.id;
+        const userId = req.params.id || req.body.id || req.body.userId;
+
         if (req.user.id === userId)
         {
             next();
@@ -68,7 +68,6 @@ const verifyTokenAndDistributor = async (req, res, next) => {
      
         if (req.user.role === "distributor")
         {
-    
             next();
         } else
         {
@@ -78,23 +77,17 @@ const verifyTokenAndDistributor = async (req, res, next) => {
 }
 const verifyTokenAndAuthorizedDistributor = async (req, res, next) => {
     verifyToken(req, res,async  () => {
-     
-        if (req.user.isDistributor)
+        if (req.user.role === 'distributor')
         {
-            const distributor = await Distributor.findById(req.user.id);
+            const distributor = await User.findById(req.user.id).populate("distributorInfo");
             if (!distributor)
             {
                 return res.status(404).json("Distributor not found");
             }
-        
-            if(!distributor.isAuthorized)
-            {
-                
+            if(!distributor.distributorInfo.isAuthorized)
+            {  
                 return res.status(403).json("You are not an authorized distributor");
             }
-            
-
-
             next();
         } else
         {
@@ -190,17 +183,16 @@ const verifyTokenAndEditOrderStatusAuthorization = async (req, res, next) => {
 const verifyTokenAndEditProductAuthorization = (req, res, next) => {
     verifyToken(req, res, async () => {
         try {
-            const product = await Product.findById(req.body.id);
+            const product = await Product.findById(req.body.productId);
             if (!product) {
                 return res.status(404).json("Product not found");
             }
-            if (req.user.isAdmin) {
+            if (req.user.role === "admin") {
                 return next();
             }
-            if (req.user.isDistributor && product.distributorId === req.user.id) 
+            if (req.user.role === "distributor" && product.distributor.toString() === req.user.id) 
             {
-                return next();
-              
+                return next();    
             }
             res.status(403).json("You are not authorized to edit this product");
         } catch (err) {
@@ -235,7 +227,6 @@ const verifyTokenAndUserAuthorization = (req, res, next) => {
     verifyToken(req, res, async () => {
         try {
         const userId = req.params.userId || req.body.userId;
-        console.log(userId);
            if(!userId)
               {
                     return res.status(403).json("Your id is not valid");

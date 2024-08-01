@@ -117,7 +117,6 @@ exports.editProductQuantityInCart = async (req, res) => {
             res.status(404).json("Product not found in cart");
             return;
         }
-        console.log(req.body);
 
         if (req.body.quantity < 0) {
             return res.status(400).json("Quantity should be greater than 0");
