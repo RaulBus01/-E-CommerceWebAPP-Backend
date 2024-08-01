@@ -28,7 +28,7 @@ const verifyToken = (req, res, next) => {
 }
 const verifyTokenAndAuthorization = (req, res, next) => {
     verifyToken(req, res, () => {
-        const userId = req.params.id || req.body.id || req.body.userId;
+        const userId = req.params.id || req.body.id || req.body.userId || req.body.user;
 
         if (req.user.id === userId)
         {
@@ -223,55 +223,29 @@ const verifyTokenAndEditDistributorAuthorization = (req, res, next) => {
     }
     );
 }
-const verifyTokenAndUserAuthorization = (req, res, next) => {
-    verifyToken(req, res, async () => {
-        try {
-        const userId = req.params.userId || req.body.userId;
-           if(!userId)
-              {
-                    return res.status(403).json("Your id is not valid");
-                }
-            if(req.user.id !== userId)
-            {
-                return res.status(403).json("You are not authorized to do this");
-            }
-
-            const user = await User.findById(userId);
-            if (!user) {
-                return res.status(404).json("User not found");
-            }
-            
-            if (req.user.id === user.id) {
-                return next();
-            }
-            res.status(403).json("You are not authorized to do this");
-        } catch (err) {
-            res.status(500).json({ error: err.message });
-        }
-    }
-    );
-}
 const verifyTokenAndReplyAuthorization = (req, res, next) => {
     verifyToken(req, res, async () => {
         try {
             const question = await Question.findById(req.body.questionId);
+            const product = await Product.findById(question.productId);
+            console.log(product);
+            console.log(req.user.id);
             if (!question) {
                 return res.status(404).json("Question not found");
             }
-            if (req.user.isAdmin) {
+            if(!product){
+                return res.status(404).json("Product not found");
+            }
+            if (req.user.role === 'admin' || req.user.role === 'customer' || req.user.id === product.distributor.toString()) {
                 return next();
             }
-            if (req.user.isDistributor) {
-                const product = await Product.findById(question.productId);
+            // if (req.user.role === "distributor") {
+            //     const product = await Product.findById(question.productId);
                 
-                if (product.distributorId === req.user.id) {
-                    return next();
-                }
-            }
-            if(verifyTokenAndUserAuthorization && req.user.isDistributor === false)
-            {
-                return next();
-            }
+            //     if (product.distributorId === req.user.id) {
+            //         return next();
+            //     }
+            // }
             res.status(403).json("You are not authorized to reply to this question");
         } catch (err) {
             res.status(500).json({ error: err.message });
@@ -307,4 +281,4 @@ const verifyOrderOwnership = async (req, res, next) => {
 
 
 
-module.exports = {verifyToken, verifyTokenAndAuthorization,verifyTokenAndAdmin,verifyTokenAndDistributor,verifyTokenAndCustomer,verifyTokenAndEditProductAuthorization,verifyTokenAndCancelOrderAuthorization,verifyTokenAndEditOrderStatusAuthorization, verifyTokenAndEditDistributorAuthorization, verifyTokenAndUserAuthorization, verifyTokenAndReplyAuthorization,verifyTokenAndAuthorizedDistributor,verifyTokendAndAssociatedDistributor,verifyOrderOwnership};
+module.exports = {verifyToken, verifyTokenAndAuthorization,verifyTokenAndAdmin,verifyTokenAndDistributor,verifyTokenAndCustomer,verifyTokenAndEditProductAuthorization,verifyTokenAndCancelOrderAuthorization,verifyTokenAndEditOrderStatusAuthorization, verifyTokenAndEditDistributorAuthorization, verifyTokenAndReplyAuthorization,verifyTokenAndAuthorizedDistributor,verifyTokendAndAssociatedDistributor,verifyOrderOwnership};

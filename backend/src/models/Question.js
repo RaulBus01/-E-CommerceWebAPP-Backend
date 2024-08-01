@@ -1,10 +1,7 @@
 const mongoose = require('mongoose');
 
 const questionSchema = new mongoose.Schema({
-    userId: {
-        type: String,
-        required: true
-    },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     productId: {
         type: String,
         required: true
@@ -13,10 +10,6 @@ const questionSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    isDistributor: {
-        type: Boolean,
-        default: false
-    }
 }, {timestamps: true});
 
 questionSchema.virtual('replies',{
