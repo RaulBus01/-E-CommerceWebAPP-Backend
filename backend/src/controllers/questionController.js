@@ -133,8 +133,6 @@ exports.getQuestionByDistributor = async (req, res) => {
         const products = await Product.find({ distributorId: req.params.id });
         const productIds = products.map(product => product._id);
         const questions = await Question.find({ productId: { $in: productIds } }).populate("replies").sort({ createdAt: -1 });
-
-        console.log(questions);
         res.status(200).json(questions);
     }
     catch (err) {

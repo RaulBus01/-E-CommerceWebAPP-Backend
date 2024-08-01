@@ -1,14 +1,14 @@
 const router = require("express").Router();
 const reviewController = require('../controllers/reviewController');
 const verifyId = require('../middleware/verifyId');
-const { verifyTokenAndAdmin, verifyTokenAndUserAuthorization, verifyTokenAndAuthorization } = require("../middleware/verifyToken");
+const { verifyToken, verifyTokenAndAdmin, verifyTokenAndAuthorization, verifyTokenAndCustomer } = require("../middleware/verifyToken");
 
 //ADD REVIEW
-router.post("/addReview", verifyId, verifyTokenAndUserAuthorization, reviewController.addReviewToProduct);
+router.post("/addReview", verifyTokenAndCustomer, verifyTokenAndAuthorization, reviewController.addReviewToProduct);
 //GET REVIEWS BY PRODUCT
-router.get("/getReviewsForProduct/:productId", verifyId, reviewController.getReviewsByProduct);
-//GET REVIEWS BY USER
-router.get("/getReviewsByUser/:id", verifyId, verifyTokenAndAuthorization, reviewController.getReviewsByUser);
+router.get("/getReviewsForProduct/:productId", reviewController.getReviewsByProduct);
+//GET REVIEWS
+router.get("/getReviews", verifyToken, reviewController.getReviews);
 //DELETE REVIEW
 router.delete("/deleteReview", verifyId, verifyTokenAndAdmin, reviewController.deleteReview);
 

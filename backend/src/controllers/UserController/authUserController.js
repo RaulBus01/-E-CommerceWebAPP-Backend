@@ -47,7 +47,6 @@ exports.registerUser = async (req, res) => {
         if(req.body.role === 'customer'){
         
             const newCustomer = new Customer( {_id: newUser._id} );    
-            console.log(newCustomer);
             const savedCustomer = await newCustomer.save();
             if(!savedCustomer){
                 return res.status(400).json("Customer not saved");

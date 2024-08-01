@@ -21,7 +21,6 @@ const verifyToken = (req, res, next) => {
         }
         
         req.user = user;
-        console.log(req.user);
         next();
     });
 
@@ -29,7 +28,7 @@ const verifyToken = (req, res, next) => {
 }
 const verifyTokenAndAuthorization = (req, res, next) => {
     verifyToken(req, res, () => {
-        const userId = req.params.id || req.body.id;
+        const userId = req.params.id || req.body.id || req.body.userId;
 
         if (req.user.id === userId)
         {
@@ -227,7 +226,6 @@ const verifyTokenAndUserAuthorization = (req, res, next) => {
     verifyToken(req, res, async () => {
         try {
         const userId = req.params.userId || req.body.userId;
-        console.log(userId);
            if(!userId)
               {
                     return res.status(403).json("Your id is not valid");
