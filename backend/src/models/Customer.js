@@ -1,40 +1,40 @@
 const mongoose = require('mongoose');
-const DistributorSchema = new mongoose.Schema({
+
+const customerSchema = new mongoose.Schema({
     _id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     address: {
         country: {
             type: String,
-            required: true,
+            required: false,
         },
         county:{
             type: String,
-            required: true,
+            required: false,
         },
         city: {
             type: String,
-            required: true,
+            required: false,
         },
         street: {
             type: String,
-            required: true,
+            required: false,
         },
         number: {
             type: String,
-            required: true,
+            required: false,
         },
         zip: {
             type: String,
-            required: true,
+            required: false,
         },
 
 
     },
-    CUI: {
+    payment: {
         type: String,
-        required: true,
-        unique: true,
+        required: false,
     },
-    isAuthorized: {
+    isVerified: {
         type: Boolean,
         default: false,
     }
@@ -42,6 +42,6 @@ const DistributorSchema = new mongoose.Schema({
 
     }, {timestamps: true});
 
-const Distributor = mongoose.model('Distributor', DistributorSchema);
+const Customer = mongoose.model('Customer', customerSchema);
 
-module.exports = Distributor;
+module.exports = Customer;

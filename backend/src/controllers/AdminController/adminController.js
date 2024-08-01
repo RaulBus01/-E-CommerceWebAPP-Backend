@@ -4,12 +4,7 @@ const Distributor = require("../../models/Distributor");
 exports.updateUser =async (req,res)=>
     {
           
-        if (req.body.hasOwnProperty('password') || req.body.hasOwnProperty('confirm_password') || req.body.hasOwnProperty('email')) 
-        {
-            res.status(400).json("You can't update password");
-            return;
-        }
-       
+    
         try{
             
             

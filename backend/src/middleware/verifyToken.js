@@ -7,11 +7,13 @@ const Question = require("../models/Question");
 
 const verifyToken = (req, res, next) => {
     const authHeader = req.headers.token;
+  
     if (!authHeader)
     {
         return res.status(401).json("You are not authenticated");
     }
     const token = authHeader.split(" ")[1];
+
     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
         if (err)
         {
@@ -19,6 +21,7 @@ const verifyToken = (req, res, next) => {
         }
         
         req.user = user;
+        console.log(req.user);
         next();
     });
 
@@ -26,8 +29,9 @@ const verifyToken = (req, res, next) => {
 }
 const verifyTokenAndAuthorization = (req, res, next) => {
     verifyToken(req, res, () => {
-        
-        if (req.user.id === req.params.id || req.user.id === req.body.id)
+        const userId = req.params.id || req.body.id;
+
+        if (req.user.id === userId)
         {
             next();
         } else
@@ -36,10 +40,22 @@ const verifyTokenAndAuthorization = (req, res, next) => {
         }
     });
 }
+const verifyTokenAndCustomer = (req, res, next) => {
+    verifyToken(req, res, () => {
+        if (req.user.role === "customer")
+        {
+            next();
+        } else
+        {
+            res.status(403).json("You are not a customer");
+        }
+
+    });
+}
 
 const verifyTokenAndAdmin = (req, res, next) => {
     verifyToken(req, res, () => {
-        if (req.user.isAdmin)
+        if (req.user.role === "admin")
         {
             next();
         } else
@@ -51,22 +67,9 @@ const verifyTokenAndAdmin = (req, res, next) => {
 const verifyTokenAndDistributor = async (req, res, next) => {
     verifyToken(req, res,async  () => {
      
-        if (req.user.isDistributor)
+        if (req.user.role === "distributor")
         {
-            const distributor = await Distributor.findById(req.user.id);
-            if (!distributor)
-            {
-                return res.status(404).json("Distributor not found");
-            }
-        
-            // if(!distributor.isAuthorized)
-            // {
-                
-            //     return res.status(403).json("You are not an authorized distributor");
-            // }
-            
-
-
+    
             next();
         } else
         {
@@ -130,38 +133,29 @@ const verifyTokendAndAssociatedDistributor = async (req, res, next) => {
 const verifyTokenAndCancelOrderAuthorization = async (req, res, next) => {
     verifyToken(req, res, async () => {
         try {
-            
             const order = await Order.findById(req.params.id);
-          
             if (!order) {
                 return res.status(404).json("Order not found");
             }
-
-            
-            if (req.user.id === order.orderId && !req.user.isDistributor) {
+            if (req.user.role === "admin") {
                 return next();
-            }   
-    
-
-            if (req.user.isDistributor) {
+            }
+            if (req.user.role === "distributor") {
                 
-               
-                const product = await Product.findById(order.products[0].product);
-
-                const isAssociatedDistributor = product.distributorId === req.user.id;
-
-                
-                if (isAssociatedDistributor) {
+                if (order.distributorId === req.user.id) {
                     return next();
                 }
             }
-
-            
+            if (req.user.id === order.userId) {
+                return next();
+            }
             res.status(403).json("You are not authorized to cancel this order");
-
         } catch (err) {
             res.status(500).json({ error: err.message });
         }
+        
+            
+           
     });
 };
 const verifyTokenAndEditOrderStatusAuthorization = async (req, res, next) => {
@@ -314,4 +308,4 @@ const verifyOrderOwnership = async (req, res, next) => {
 
 
 
-module.exports = {verifyToken, verifyTokenAndAuthorization,verifyTokenAndAdmin,verifyTokenAndDistributor,verifyTokenAndEditProductAuthorization,verifyTokenAndCancelOrderAuthorization,verifyTokenAndEditOrderStatusAuthorization, verifyTokenAndEditDistributorAuthorization, verifyTokenAndUserAuthorization, verifyTokenAndReplyAuthorization,verifyTokenAndAuthorizedDistributor,verifyTokendAndAssociatedDistributor,verifyOrderOwnership};
+module.exports = {verifyToken, verifyTokenAndAuthorization,verifyTokenAndAdmin,verifyTokenAndDistributor,verifyTokenAndCustomer,verifyTokenAndEditProductAuthorization,verifyTokenAndCancelOrderAuthorization,verifyTokenAndEditOrderStatusAuthorization, verifyTokenAndEditDistributorAuthorization, verifyTokenAndUserAuthorization, verifyTokenAndReplyAuthorization,verifyTokenAndAuthorizedDistributor,verifyTokendAndAssociatedDistributor,verifyOrderOwnership};

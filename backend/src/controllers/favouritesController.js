@@ -1,15 +1,7 @@
 const Favourites = require("../models/Favourites");
 const mongoose = require('mongoose');
 
-exports.createFavourites = async (req, res) => {
-  const newFavourites = new Favourites({ products: [], userId: req.body.id });
-  try {
-    const savedFavourites = await newFavourites.save();
-    res.status(200).json(savedFavourites);
-  } catch (err) {
-    res.status(500).json(err);
-  }
-};
+
 exports.addFavourites = async (req, res) => {
   try {
     const favourites = await Favourites.findOne({ userId: req.body.id });

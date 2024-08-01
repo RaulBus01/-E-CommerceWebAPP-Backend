@@ -19,11 +19,14 @@ const userSchema = new mongoose.Schema({
     role:{
         type: String,
         required: true,
+        enum: ['distributor', 'customer', 'admin'],
     },
     phoneNumber: {
         type: String,
         required: false,
-    }
+    },
+    distributorInfo: { type: mongoose.Schema.Types.ObjectId, ref: 'Distributor' },
+    customerInfo: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer' }
     
 
     }, {timestamps: true});

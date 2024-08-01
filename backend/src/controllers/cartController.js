@@ -1,18 +1,6 @@
 const Cart = require('../models/Cart');
 
-exports.createCart = async (req, res) => {
-    const newCart = new Cart({
-        userId: req.body.id,
-        products: [],
-    });
 
-    try {
-        const savedCart = await newCart.save();
-        res.status(200).json(savedCart);
-    } catch (err) {
-        res.status(500).json(err);
-    }
-};
 
 exports.addProductToCart = async (req, res) => {
     try {

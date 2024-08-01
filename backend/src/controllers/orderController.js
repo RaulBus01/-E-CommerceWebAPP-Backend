@@ -5,13 +5,13 @@ const User = require('../models/User');
 exports.createOrder = async (req, res) => {
     try {
         const products = req.body.products;
-        console.log(req.body.userId);
-        const user = await User.findById(req.body.userId);
-        console.log(user);
+      
+        const user = await User.findById(req.body.id).populate('customerInfo');
+       
         if (!user) {
             return res.status(400).json("User not found");
         }
-        if(!user.isVerified){
+        if(!user.customerInfo.isVerified){
             return res.status(400).json("User is not verified");
         }
         if (!products || products.length === 0) {
@@ -53,12 +53,10 @@ exports.createOrder = async (req, res) => {
         const orders = [];
         for (const [distributorId, orderData] of ordersByDistributor) {
             const newOrder = new Order({
-                userId: req.body.userId,
+                userId: req.body.id,
                 products: orderData.products,
-                status: "Pending",
-                first_name: req.body.first_name,
-                last_name: req.body.last_name,
-                email: req.body.email,
+                name: req.body.name,
+                email: req.user.email,
                 phoneNumber: req.body.phoneNumber,
                 address: {
                     country: req.body.address.country,
@@ -91,21 +89,21 @@ exports.cancelOrder = async(req, res) => {
             return;
         }
         if (order.status === "Delivered") {
-            res.status(400).json("Order is already delivered");
-            return;
+            return res.status(400).json("Order is already delivered");
+           
         }
         if (order.status === "Shipped") {
-            res.status(400).json("Order is already shipped");
-            return;
+            return res.status(400).json("Order is already shipped");
+           
         }
-        if (order.status === "Canceled") {
-            res.status(400).json("Order is already cancelled");
-            return;
+        if (order.status === "Cancelled") {
+            return res.status(400).json("Order is already cancelled");
+           
         }
-        order.status = "Canceled";
+        order.status = "Cancelled";
         await order.save();
 
-        res.status(200).json({message: "Order canceled "});
+        res.status(200).json({message: "Order cancelled "});
     } catch(error){
         res.status(500).json(error);
     }
@@ -123,14 +121,7 @@ exports.getAllOrders = async(req, res) => {
     }
 }
 
-exports.getOrdersByUser = async(req, res) => {
-    try{
-        const orders = await Order.find({userId: req.params.id});
-        res.status(200).json(orders);
-    } catch(error){
-        res.status(500).json(error);
-    }
-}
+
 
 exports.editOrderStatus = async(req, res) => {
     try{
@@ -161,6 +152,16 @@ exports.editOrderStatus = async(req, res) => {
 exports.getOrder = async(req, res) => {
     try{
         const order = await Order.findById(req.params.id).populate('products.product');
+        if(!order){
+            return res.status(404).json("Order not found");
+            
+        }
+        if(req.user.role === 'admin'){
+            return res.status(200).json(order);
+        }
+        if(order.userId !== req.user.id || order.distributorId !== req.user.id){
+            return res.status(401).json("You are not authorized to view this order");
+        }
         res.status(200).json(order);
     } catch(error){
         res.status(500).json(error);

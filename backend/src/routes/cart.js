@@ -4,8 +4,7 @@ const router = require('express').Router();
 const cartController = require('../controllers/cartController');
 
 
-//CREATE
-router.post("/create",verifyTokenAndAuthorization,cartController.createCart);
+
 //UPDATE
 router.put("/add",verifyTokenAndAuthorization,cartController.addProductToCart);
 //DELETE

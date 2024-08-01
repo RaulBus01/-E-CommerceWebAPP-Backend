@@ -1,8 +1,7 @@
 const verifyId = (req, res, next) => {
   
-   
-    if((req.body.hasOwnProperty("id") && req.body.id.length !== 24 ) ||
-    (req.params.hasOwnProperty("id") && req.params.id.length !== 24 )) {
+    const id = req.params.id || req.body.id;
+    if(!id){
         return res.status(400).json("Invalid id");
     }
     next();

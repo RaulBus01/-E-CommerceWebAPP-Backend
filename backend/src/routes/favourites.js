@@ -2,8 +2,6 @@ const { verifyTokenAndAuthorization, verifyTokenAndAdmin } = require('../middlew
 const router = require('express').Router();
 const favouritesController = require('../controllers/favouritesController');
 
-//CREATE
-router.post("/create", verifyTokenAndAuthorization, favouritesController.createFavourites);
 
 //ADD
 router.put("/add", verifyTokenAndAuthorization, favouritesController.addFavourites);

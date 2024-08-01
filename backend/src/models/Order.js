@@ -2,10 +2,11 @@ const mongoose = require('mongoose');
 
 
 const OrderSchema= new mongoose.Schema({
-    userId:{
-        type: String,
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
         required: true,
-    },
+      },
     
     products: [
         {
@@ -22,15 +23,13 @@ const OrderSchema= new mongoose.Schema({
     status: {
         type: String,
         required: true,
+        enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled'],
+        default: 'Pending',
     },
-    first_name: {
+     name: {
         type: String,
         required: true,
-    },
-    last_name: {
-        type: String,
-        required: true,
-    },
+     },
     email: {
         type: String,
         required: true,
@@ -70,9 +69,10 @@ const OrderSchema= new mongoose.Schema({
         required: true,
     },
     distributorId: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
         required: true,
-    }
+      }
     
 }, {timestamps: true});
 
