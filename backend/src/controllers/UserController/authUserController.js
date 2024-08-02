@@ -14,11 +14,10 @@ exports.registerUser = async (req, res) => {
     try {
         
         if(req.body.password !== req.body.confirm_password){
-            return res.status(400).json("Passwords do not match");
-           
+            return res.status(400).json({message: "Passwords do not match"});
         }
         if(req.body.password.length < 6){
-            return res.status(400).json("Password must be at least 6 characters long");
+            return res.status(400).json({message: "Password must be at least 6 characters long"});
         
         }
         const newUser = new User({
@@ -38,7 +37,7 @@ exports.registerUser = async (req, res) => {
            
             const savedDistributor = await newDistributor.save();
             if(!savedDistributor){
-                return res.status(400).json("Distributor not saved");
+                return res.status(400).json({message: "Distributor not saved"});
             
             }
 
@@ -49,7 +48,7 @@ exports.registerUser = async (req, res) => {
             const newCustomer = new Customer( {_id: newUser._id} );    
             const savedCustomer = await newCustomer.save();
             if(!savedCustomer){
-                return res.status(400).json("Customer not saved");
+                return res.status(400).json({message: "Customer not saved"});
                 
             }
 
@@ -59,7 +58,7 @@ exports.registerUser = async (req, res) => {
 
         const user = await newUser.save();
         if(!user){
-            return res.status(400).json("User not saved");  
+            return res.status(400).json({message: "User not saved"});
         }
 
         
@@ -75,16 +74,16 @@ exports.registerUser = async (req, res) => {
     
         if(user.role === 'customer')
         {
-            const newCart = new Cart({ products: [], userId: user._id });
+            const newCart = new Cart({ products: [], user: user._id });
             const savedCart = await newCart.save();
             if(!savedCart){
-                return res.status(400).json("Cart not saved");
+                return res.status(400).json({message: "Cart not saved"});
                 
             }
-            const newFavourites = new Favourites({ products: [], userId: user._id });
+            const newFavourites = new Favourites({ products: [], user: user._id });
             const savedFavourites = await newFavourites.save();
             if(!savedFavourites){
-                res.status(400).json("Favourites not saved");
+                res.status(400).json({message: "Favourites not saved"});
                 return;
             }
         }
@@ -99,10 +98,18 @@ exports.registerUser = async (req, res) => {
         
         const link = `http://localhost:3001/api/users/confirmAccount/${savedVerificationToken.token}`;
         const {password, ...others} = user._doc;
+        res.cookie("accessToken", accessToken, {
+               
+            expires: new Date(Date.now() + tokenExpiration), 
+            sameSite : 'none',
+            secure: true,
+           
+           
+        });
         if(user.role ==='customer')
         {
             await verifyEmail(user.email, link);
-        
+            
            
                 
             res.status(200).send({
@@ -121,14 +128,21 @@ exports.registerUser = async (req, res) => {
             });
         }
         
-        
-
-        
-        
     } catch (err) {
+        if(err.code === 11000){
+            if(err.keyValue.email){
+            return res.status(400).json({message: "Email already exists"});
+            }
+            if(err.keyValue.CUI){
+                return res.status(400).json({message: "CUI already exists"});
+            }
+            
+        }
+
         res.status(500).json(err);
     }
 }
+const tokenExpiration = 3 * 24 * 60 * 60 * 1000; // 3 days in milliseconds
 exports.loginUser =  async (req, res) => {
 
     try {
@@ -136,7 +150,7 @@ exports.loginUser =  async (req, res) => {
             email: req.body.email,
         });
         if(!user){
-            res.status(404).json("Wrong email");
+            res.status(404).json({message: "User not found"});
             return;
         }
         const hashedPassword = CryptoJS.AES.decrypt(user.password, process.env.PASS_SECRET).toString(CryptoJS.enc.Utf8);
@@ -154,16 +168,32 @@ exports.loginUser =  async (req, res) => {
                 process.env.JWT_SECRET,
                 { expiresIn: "3d" }
             );
+            res.cookie("accessToken", accessToken, {
+               
+                expires: new Date(Date.now() + tokenExpiration), 
+                sameSite : 'none',
+                secure: true,
+               
+               
+            });
 
             res.status(200).json({
                 user: others,
-                accessToken: accessToken,
+                
 
             });
            
         } else {
-            res.status(401).json("Wrong password");
+            res.status(401).json({message: "Invalid credentials"});
         }
+    } catch (err) {
+        res.status(500).json(err);
+    }
+}
+exports.logoutUser = async (req, res) => {
+    try {
+        res.clearCookie("accessToken");
+        res.status(200).json({ message: "Logged out" });
     } catch (err) {
         res.status(500).json(err);
     }
