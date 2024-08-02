@@ -5,7 +5,7 @@ const Customer = require("../../models/Customer");
 
 
 exports.updateUser = async (req, res) => {
-    const { id, password, confirm_password,...updateFields } = req.body;
+    const { password, confirm_password,...updateFields } = req.body;
 
     
   
@@ -23,8 +23,8 @@ exports.updateUser = async (req, res) => {
     }
 
     try {
-        
-        const user = await User.findById(id);
+        console.log(req.user.id);
+        const user = await User.findById(req.user.id);
         if (!user) {
             return res.status(404).json("User not found");
         }
@@ -106,7 +106,7 @@ exports.updateUser = async (req, res) => {
             user.phoneNumber ={};
         }
         const updatedUser = await User.findByIdAndUpdate(
-            id, 
+            user._id, 
             { $set: updateFields }, 
             { new: true }
         );
@@ -161,15 +161,21 @@ exports.getUser = async (req, res) => {
             return res.status(404).json("User not found");
         
         }
-        if(user.role === 'distributor')
+        if(req.user.role === 'admin')
+        {
+            const userData = await User.findById(user._id).populate('distributorInfo').populate('customerInfo');
+            const { password, ...others } = userData._doc;
+            return res.status(200).json(others);
+        }
+        if(req.user.role === 'distributor')
         {
             const userData = await User.findById(user._id).populate('distributorInfo');
             const { password, ...others } = userData._doc;
             return res.status(200).json(others);
         }
-        if(user.role === 'customer')
+        if(req.user.role === 'customer')
         {
-            const userData = await User.findById(user._id).populate('customerInfo');
+            const userData = await User.findById(user._id).populate('customerInfo').populate('distributorInfo','address CUI')
             const { password, ...others } = userData._doc;
             return res.status(200).json(others);
         }
