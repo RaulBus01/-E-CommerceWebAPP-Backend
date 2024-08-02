@@ -68,6 +68,12 @@ const OrderSchema= new mongoose.Schema({
         type: Number,
         required: true,
     },
+    paymentMethod: {
+        type: String,
+        required: true,
+        enum: ['Cash On Delivery', 'Credit Card', 'Paypal'],
+        default: 'Cash On Delivery',
+    },
     distributor: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',

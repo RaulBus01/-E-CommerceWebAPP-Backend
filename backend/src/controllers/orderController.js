@@ -66,6 +66,7 @@ exports.createOrder = async (req, res) => {
                     number: req.body.address.number,
                     zip: req.body.address.zip,
                 },
+                paymentMethod: req.body.paymentMethod,
                 totalPrice: orderData.totalPrice,
                 distributor: distributor,
             });
