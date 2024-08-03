@@ -8,7 +8,7 @@ router.post("/create", verifyTokenAndAdmin, favouritesController.createFavourite
 router.put("/add",verifyToken, favouritesController.addFavourites);
 
 //DELETE PRODUCT FROM FAVOURITES
-router.delete("/deleteProduct", verifyToken, favouritesController.deleteProductFromFavourites);
+router.delete("/deleteProduct/:productId", verifyToken, favouritesController.deleteProductFromFavourites);
 
 //DELETE FAVOURITES LIST
 router.delete("/deleteAll", verifyToken, favouritesController.deleteAllFavourites);

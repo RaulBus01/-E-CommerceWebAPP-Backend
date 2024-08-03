@@ -179,6 +179,7 @@ exports.loginUser =  async (req, res) => {
 
             res.status(200).json({
                 user: others,
+                accessToken: accessToken,
                 
 
             });
@@ -186,6 +187,46 @@ exports.loginUser =  async (req, res) => {
         } else {
             res.status(401).json({message: "Invalid credentials"});
         }
+    } catch (err) {
+        res.status(500).json(err);
+    }
+}
+exports.refreshToken = async (req, res) => {
+    try {
+        const token = req.cookies.accessToken;
+        if(!token){
+            return res.status(403).json({message: "User not authenticated"});
+        }
+        jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+            if(err){
+                return res.status(403).json({message: "User not authenticated"});
+            }
+            const accessToken = jwt.sign(
+                { 
+                    id: user.id,
+                    role: user.role,
+                    email: user.email,
+                    name: user.name,
+                    customerInfo: user.customerInfo,
+                    distributorInfo: user.distributorInfo,
+                    createdAt: user.createdAt,
+                    phoneNumber: user.phoneNumber,
+                    
+                  
+                },
+                process.env.JWT_SECRET,
+                { expiresIn: "3d" }
+            );
+            res.cookie("accessToken", accessToken, {
+               
+                expires: new Date(Date.now() + tokenExpiration), 
+                sameSite : 'none',
+                secure: true,
+               
+               
+            });
+            res.status(200).json({accessToken});
+        });
     } catch (err) {
         res.status(500).json(err);
     }

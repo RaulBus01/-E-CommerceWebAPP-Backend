@@ -5,12 +5,7 @@ const Customer = require("../../models/Customer");
 
 
 exports.updateUser = async (req, res) => {
-    const { password, confirm_password,...updateFields } = req.body;
-
-    
-  
-
-   
+    const { id,password, confirm_password,...updateFields } = req.body;
     if (password || confirm_password) {
         if (!password || !confirm_password) {
             return res.status(400).json("You have to enter both password and confirm password");
@@ -24,7 +19,7 @@ exports.updateUser = async (req, res) => {
 
     try {
         console.log(req.user.id);
-        const user = await User.findById(req.user.id);
+        const user = await User.findById(id);
         if (!user) {
             return res.status(404).json("User not found");
         }

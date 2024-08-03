@@ -4,6 +4,7 @@ const Product = require('../models/Product');
 const { default: mongoose } = require('mongoose');
 
 exports.addQuestion = async (req, res) => {
+    console.log(req.user.id);   
         const newQuestion = new Question({
             user: req.user.id,
             productId: req.body.productId,
@@ -12,9 +13,9 @@ exports.addQuestion = async (req, res) => {
         try {   
             const savedQuestion = await newQuestion.save();
             const populatedQuestion = await Question.findById(savedQuestion._id).populate('user', 'name email role');
-            res.status(200).json(populatedQuestion);
+            res.status(200).json({ message: 'Question added', question: populatedQuestion });
         } catch (err) {
-            res.status(500).json(err);
+            res.status(500).json({ message: 'Error adding question', error: err.message });
         }
 }
 exports.addReply = async (req, res) => {
@@ -26,9 +27,9 @@ exports.addReply = async (req, res) => {
     try {
         const savedReply = await newReply.save();
         const populatedReply = await Reply.findById(savedReply._id).populate('user', 'name email role');
-        res.status(200).json(populatedReply);
+        res.status(200).json({ message: 'Reply added', reply: populatedReply });
     } catch (err) {
-        res.status(500).json(err);
+        res.status(500).json({ message: 'Error adding reply', error: err.message });
     }
 
 }
@@ -39,13 +40,13 @@ exports.updateQuestion = async (req, res) => {
             $set: req.body,
         }, { new: true });
         if (!updatedQuestion) {
-            res.status(404).json("Question not found");
+            res.status(404).json({ message: "Question not found" });
             return;
         }
-        res.status(200).json(updatedQuestion);
+        res.status(200).json({ message: "Question has been updated", question:updatedQuestion });
 
     } catch (err) {
-        res.status(500).json(err);
+        res.status(500).json({ message: "Error updating question", error: err.message });
     }
 }
 exports.deleteQuestion = async (req, res) => {
@@ -54,13 +55,13 @@ exports.deleteQuestion = async (req, res) => {
             const result = await Question.findByIdAndDelete(questionId);
             await mongoose.model('Reply').deleteMany({questionId});
             if (!result) {
-                res.status(404).json("Question not found");
+                res.status(404).json({ message: "Question not found" });
                 return;
             }
-            res.status(200).json("Question and its replies have been deleted");
+            res.status(200).json({ message: "Question has been deleted" });
         }
         catch (err) {
-            res.status(500).json(err);
+            res.status(500).json({ message: "Error deleting question", error: err.message });
         }
 }
 exports.deleteReply = async (req, res) => {
@@ -68,19 +69,19 @@ exports.deleteReply = async (req, res) => {
         const result = await Reply.findByIdAndDelete
             (req.body.replyId);
         if (!result) {
-            res.status(404).json("Reply not found");
+            res.status(404).json({ message: "Reply not found" });
             return;
         }
-        res.status(200).json("Reply has been deleted");
+        res.status(200).json({ message: "Reply has been deleted" });
     }catch (err) {
-        res.status(500).json(err);
+        res.status(500).json({ message: "Error deleting reply", error: err.message });
     }
 }
 exports.getQuestionByProduct = async (req, res) => {
     try { 
         const questions = await Question.find({ productId: req.params.productId }).populate("replies").populate("user", "name role");
         if(!questions){
-            return res.status(404).json("Product has no questions");
+            return res.status(404).json({ message: 'No questions found for this product' });
         }
         const processedQuestions = questions.map(question => ({
             id: question._id,
@@ -98,7 +99,8 @@ exports.getQuestionByProduct = async (req, res) => {
             updatedAt: question.updatedAt
 
         }));
-        res.status(200).json(processedQuestions);
+        res.status(200).json({ message: 'Questions found',
+            questions: processedQuestions });
     } catch (err) {
         console.error('Error fetching questions:', err);
         res.status(500).json({ message: 'Error fetching questions', error: err.message });
@@ -106,7 +108,8 @@ exports.getQuestionByProduct = async (req, res) => {
 }
 exports.getQuestionByUser = async (req, res) => {
     try {
-        console.log(req.user);
+        console.log(req.user.id);
+        console.log(req.params.userId);
         let questions = null;
         if(req.user.role === "admin" || (req.user.role === "customer" && req.user.id === req.params.userId)){
             questions = await Question.find({ user: req.params.userId }).populate({
@@ -115,10 +118,10 @@ exports.getQuestionByUser = async (req, res) => {
             });
         }
         if((req.user.role === "customer" && req.user.id !== req.params.userId) || (req.user.role === "distributor")){
-            return res.status(500).json("You are not allowed to see this user's questions");
+            return res.status(500).json({ message: "Unauthorized" });
         }
         if (!questions) {
-            return res.status(404).json("No questions found for this user");
+            return res.status(404).json({ message: 'No questions found for this user' });
         }
         const processedQuestions = questions.map(question => ({
             id: question._id,
@@ -135,20 +138,10 @@ exports.getQuestionByUser = async (req, res) => {
             createdAt: question.createdAt,
             updatedAt: question.updatedAt
         }));
-        res.status(200).json(processedQuestions);
+        res.status(200).json({ message: 'Questions found',
+            questions: processedQuestions });
         
     } catch (err) {
-        res.status(500).json(err);
+        res.status(500).json({ message: 'Error fetching questions', error: err.message });
     }
 }
-// exports.getQuestionByDistributor = async (req, res) => {
-//     try {
-//         const products = await Product.find({ distributorId: req.params.id });
-//         const productIds = products.map(product => product._id);
-//         const questions = await Question.find({ productId: { $in: productIds } }).populate("replies").sort({ createdAt: -1 });
-//         res.status(200).json(questions);
-//     }
-//     catch (err) {
-//         res.status(500).json(err);
-//     }
-// }
