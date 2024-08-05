@@ -10,7 +10,7 @@ router.put("/cancelOrder/:id", verifyTokenAndCancelOrderAuthorization, orderCont
 //GET ORDER BY ID
 router.get("/order/:id",verifyToken, orderController.getOrderDetails);
 //GET ALL ORDERS(ADMIN)
-router.get("/orders", verifyToken, orderController.getOrdersByUser);
+router.get("/find", verifyToken, orderController.getOrdersByUser);
 //EDIT ORDER STATUS(ADMIN & DISTRIBUTOR)
 router.put("/editOrderStatus/:id",verifyTokenAndEditOrderStatusAuthorization, orderController.editOrderStatus);
 

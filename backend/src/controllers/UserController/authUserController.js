@@ -25,7 +25,10 @@ exports.registerUser = async (req, res) => {
             email: req.body.email,
             password: CryptoJS.AES.encrypt(req.body.password, process.env.PASS_SECRET).toString(),
             role: req.body.role,
+            phoneNumber: req.body.phoneNumber? req.body.phoneNumber : null,
         });
+
+        console.log(newUser);
        
         if(req.body.role === 'distributor'){
             
@@ -40,6 +43,7 @@ exports.registerUser = async (req, res) => {
                 return res.status(400).json({message: "Distributor not saved"});
             
             }
+            console.log(savedDistributor);
 
             newUser.distributorInfo = savedDistributor._id;
         }
@@ -55,23 +59,15 @@ exports.registerUser = async (req, res) => {
             newUser.customerInfo = savedCustomer._id;
         }
         
-
+        console.log(newUser);
         const user = await newUser.save();
         if(!user){
             return res.status(400).json({message: "User not saved"});
         }
+ 
 
-        
        
-        const accessToken = jwt.sign({
-            id: user._id,
-            role: user.role,
-            email: user.email,
-            name: user.name,
-           
-        }, process.env.JWT_SECRET, {expiresIn: "3d"});
-
-    
+        
         if(user.role === 'customer')
         {
             const newCart = new Cart({ products: [], user: user._id });
@@ -98,14 +94,7 @@ exports.registerUser = async (req, res) => {
         
         const link = `http://localhost:3001/api/users/confirmAccount/${savedVerificationToken.token}`;
         const {password, ...others} = user._doc;
-        res.cookie("accessToken", accessToken, {
-               
-            expires: new Date(Date.now() + tokenExpiration), 
-            sameSite : 'none',
-            secure: true,
-           
-           
-        });
+      
         if(user.role ==='customer')
         {
             await verifyEmail(user.email, link);
@@ -115,7 +104,7 @@ exports.registerUser = async (req, res) => {
             res.status(200).send({
                 message: 'Verification email sent. Please check your email',
                 user: others,
-                accessToken: accessToken,
+                
 
             });
         }
@@ -123,7 +112,7 @@ exports.registerUser = async (req, res) => {
             res.status(200).send({
                 message: 'Distributor account created',
                 user: others,
-                accessToken: accessToken,
+             
 
             });
         }
@@ -148,7 +137,7 @@ exports.loginUser =  async (req, res) => {
     try {
         const user = await User.findOne({
             email: req.body.email,
-        });
+        }).populate('customerInfo').populate('distributorInfo');
         if(!user){
             res.status(404).json({message: "User not found"});
             return;
@@ -159,10 +148,14 @@ exports.loginUser =  async (req, res) => {
             const{password, ...others} = user._doc;
             const accessToken = jwt.sign(
                 { 
-                    id: user._id,
+                    id: user.id,
                     role: user.role,
                     email: user.email,
                     name: user.name,
+                    customerInfo: user.customerInfo,
+                    distributorInfo: user.distributorInfo,
+                    createdAt: user.createdAt,
+                    phoneNumber: user.phoneNumber,
                   
                 },
                 process.env.JWT_SECRET,
@@ -171,8 +164,8 @@ exports.loginUser =  async (req, res) => {
             res.cookie("accessToken", accessToken, {
                
                 expires: new Date(Date.now() + tokenExpiration), 
-                sameSite : 'none',
-                secure: true,
+             
+               
                
                
             });

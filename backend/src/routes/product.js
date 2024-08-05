@@ -9,7 +9,7 @@ router.post("/add", verifyTokenAndAuthorizedDistributor,productController.create
 //UPDATE
 router.put("/edit", verifyTokenAndEditProductAuthorization,productController.updateProduct);
 //DELETE
-router.delete("/delete", verifyTokenAndEditProductAuthorization, productController.deleteProduct);
+router.delete("/delete/:productId", verifyTokenAndEditProductAuthorization, productController.deleteProduct);
 //GET PRODUCT BY ID
 router.get("/find/:id", productController.getProduct);
 // GET ALL PRODUCTS

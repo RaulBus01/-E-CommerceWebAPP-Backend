@@ -2,6 +2,7 @@ const User = require("../../models/User");
 const CryptoJS = require("crypto-js");
 const Distributor = require("../../models/Distributor");
 const Customer = require("../../models/Customer");
+const jwt = require("jsonwebtoken");
 
 
 exports.updateUser = async (req, res) => {
@@ -64,6 +65,8 @@ exports.updateUser = async (req, res) => {
                 { $set: updateFields },
                 { new: true }   
             );
+
+            
         }
         if(req.user.role === 'admin')
         {
@@ -104,11 +107,32 @@ exports.updateUser = async (req, res) => {
             user._id, 
             { $set: updateFields }, 
             { new: true }
-        );
+        ).populate('distributorInfo').populate('customerInfo');
+        const updateToken = jwt.sign({ id: updatedUser._id,
+             role: updatedUser.role, 
+             email: updatedUser.email, 
+             name: updatedUser.name ,
+             phoneNumber: updatedUser.phoneNumber,
+            distributorInfo: updatedUser.distributorInfo,
+            customerInfo: updatedUser.customerInfo,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt
+            },process.env.JWT_SECRET, { expiresIn: "3d" });
+
+            const tokenExpiration = 1000 * 60 * 60 * 24 * 3;
+            res.cookie("accessToken", updateToken, {
+               
+                expires: new Date(Date.now() + tokenExpiration), 
+               
+               
+               
+               
+            });
+            
 
         const { password, ...others } = updatedUser._doc;
-
-        res.status(200).json(others);
+       
+        res.status(200).json({ user: others, accessToken: updateToken });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Server error", error: err });

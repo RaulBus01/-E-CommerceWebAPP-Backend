@@ -4,7 +4,16 @@ const Review = require('../models/Review');
 
 exports.createProduct = async (req, res) => {
 
-    const newProduct = new Product(req.body);
+    const newProduct = new Product({
+        name: req.body.name,
+        price: req.body.price,
+        categories: req.body.categories,
+        description: req.body.description,
+        image: req.body.image,
+        stock: req.body.stock,
+        distributor: req.user.id,
+    });
+    
     try {
         const categoryExists = await Category.findById(req.body.categories);
         if (!categoryExists) {
@@ -41,7 +50,8 @@ exports.updateProduct = async (req, res) => {
 }
 exports.deleteProduct = async (req, res) => {
         try {
-            await Product.findByIdAndDelete(req.body.productId);
+            console.log(req.params.productId);
+            await Product.findByIdAndDelete(req.params.productId);
             res.status(200).json("Product has been deleted");
         } catch (err) {
             res.status(500).json(err);  
@@ -79,9 +89,31 @@ exports.getProductsByCategory = async (req, res) => {
 
 exports.getProductsByDistributor = async (req, res) => {
     try {
-        const products = await Product.find({ distributor: req.params.id })
-        .populate('reviews').populate("questions").populate("distributor", "name");
-        res.status(200).json(products);
+       
+        const products = await Product.find()
+            .populate("distributor", "name")
+            .populate("categories", "name")
+            .populate("reviews")
+            .populate("questions");
+
+    
+        let userId;
+        if(req.user.role === 'customer'){
+            userId = req.params.id;
+        }
+        if(req.user.role === 'distributor'){
+            userId = req.user.id;
+        }
+   
+        const filteredProducts = products.filter((product) => {
+            
+             return product.distributor._id.toString() === userId
+       
+        });
+
+        console.log(filteredProducts);
+
+        res.status(200).json(filteredProducts);
     } catch (err) {
         res.status(500).json(err);
     }

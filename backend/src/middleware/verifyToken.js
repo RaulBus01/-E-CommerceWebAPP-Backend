@@ -184,7 +184,7 @@ const verifyTokenAndEditOrderStatusAuthorization = async (req, res, next) => {
 const verifyTokenAndEditProductAuthorization = (req, res, next) => {
     verifyToken(req, res, async () => {
         try {
-            const product = await Product.findById(req.body.productId);
+            const product = await Product.findById(req.params.productId);
             if (!product) {
                 return res.status(404).json("Product not found");
             }
