@@ -25,7 +25,12 @@ exports.createProduct = async (req, res) => {
       });
       const savedProduct = await newProduct.save();
 
-      const imageUrls = imageFiles.map((file) => `/api/products/image/${file.filename}`);
+      const imageUrls = imageFiles.map((file) => { 
+        return `${process.env.BASE_URL}/api/uploads/${file.filename}`;
+        });
+    
+
+        console.log(imageUrls);
       
       savedProduct.image = imageUrls;
       await savedProduct.save();
@@ -76,12 +81,19 @@ exports.getAllProducts = async (req, res) => {
 
 exports.getProduct = async (req, res) => {
     try {
-        const product = await Product.findById(req.params.id).populate("distributor", "name").populate("reviews").populate("questions");
+      const productId = req.params.id;
+  
+      const product = await Product.findById(productId);
+  
+      if (!product) {
+        return res.status(404).json({ message: 'Product not found' });
+      }
+    
         res.status(200).json(product);
     } catch (err) {
-        res.status(500).json(err);  
+      res.status(500).json({ message: 'Error fetching product', error: err.message });
     }
-}
+  };
 exports.getProductsByCategory = async (req, res) => {
     try {
         const products = await Product.find({
@@ -125,20 +137,4 @@ exports.getProductsByDistributor = async (req, res) => {
     } catch (err) {
         res.status(500).json(err);
     }   
-}
-exports.getImage = async (req, res) => {
-    try{
-        const {productId} = req.params;
-        console.log(productId);
-        const files = await gfs.find({'metadata.productId': productId}).toArray();
-        console.log(files);
-        if (!files || files.length === 0) {
-            return res.status(404).json({ message: 'File not found' });
-        }
-
-        const imageUrls = files.map((file) => `/api/products/image/${file.filename}`);
-        res.status(200).json(imageUrls);
-    } catch(error){
-        res.status(500).json(error);
-    }
 }

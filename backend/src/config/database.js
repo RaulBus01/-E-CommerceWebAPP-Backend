@@ -13,6 +13,7 @@ database.on('error', (error) => {
   process.exit(1);
 });
 database.once('open', function () {
+  
   console.log('Connected to MongoDB');
 });
 

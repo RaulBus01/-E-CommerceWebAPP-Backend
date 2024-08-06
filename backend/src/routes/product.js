@@ -18,6 +18,4 @@ router.get("/findCategory/:category", productController.getProductsByCategory);
 //GET PRODUCTS BY DISTRIBUTOR
 router.get("/findDistributor/:id", verifyTokenAndDistributor, productController.getProductsByDistributor);
 
-router.get("/image/:productId", productController.getImage);
-
 module.exports = router;    
