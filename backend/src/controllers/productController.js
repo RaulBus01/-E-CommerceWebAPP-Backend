@@ -4,6 +4,15 @@ const Review = require('../models/Review');
 
 exports.createProduct = async (req, res) => {
 
+    const categoriesArray = req.body.categories;
+    categoriesArray.forEach(async (category) => {
+        const categoryExists = await Category.findById(category);
+        if (!categoryExists) {
+            res.status(400).json("Category does not exist");
+            return;
+        }
+    } );  
+    
     const newProduct = new Product({
         name: req.body.name,
         price: req.body.price,
@@ -15,12 +24,6 @@ exports.createProduct = async (req, res) => {
     });
     
     try {
-        const categoryExists = await Category.findById(req.body.categories);
-        if (!categoryExists) {
-            return res.status(400).json("Category does not exist");
-        }
-        
-    
         const savedProduct = await newProduct.save();
         res.status(200).json(savedProduct);
     } catch (err) {
@@ -37,12 +40,12 @@ exports.updateProduct = async (req, res) => {
         if (req.body.hasOwnProperty("distributorId")) {
             return res.status(403).json("You are not authorized to edit the distributorId field");
         }
-        console.log(product);
+       
         Object.keys(req.body).forEach((key) => {
             product[key] = req.body[key];
         });
         const savedProduct = await product.save();
-        console.log(savedProduct);
+        
         res.status(200).json(savedProduct);
     } catch (err) {
         res.status(500).json(err);

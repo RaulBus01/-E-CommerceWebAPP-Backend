@@ -15,7 +15,7 @@ exports.createFavourites = async (req, res) => {
 exports.addFavourites = async (req, res) => {
   try {
     console.log(req.user.id);
-    const favourites = await Favourites.findOne({ user: req.user.id });
+    const favourites = await Favourites.findOne({ user: req.user.id }).populate('products.product');
 
     if (!favourites) {
       res.status(404).json({ message: "Favourites list not found" });
@@ -38,7 +38,8 @@ exports.addFavourites = async (req, res) => {
     if (!result) {
       return res.status(400).json({ message: "Product not added to favourites" });
     }
-    res.status(200).json({ message: "Product added to favourites", result });
+    res.status(200).json({ message: "Product added to favourites", result: newProduct });
+    console.log(newProduct);
 
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -100,7 +101,7 @@ exports.getFavourites = async (req, res) => {
       return;
     }
     res.json({message: "Favourites list found", favourites});
-    console.log(favourites);
+   
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
