@@ -4,7 +4,7 @@ const User = require('../models/User');
 
 exports.addReviewToProduct = async (req, res) => {
     try{
-        const { productId, userId, rating, content } = req.body;
+        const { productId, userId, rating, title, content } = req.body;
         console.log(req.body);
         const product = await Product.findById(productId);
         if(!product){
@@ -20,6 +20,7 @@ exports.addReviewToProduct = async (req, res) => {
             product: productId,
             user: userId,
             rating,
+            title,
             content
         });
         console.log(newReview);
@@ -45,7 +46,7 @@ exports.getReviewsByProduct = async (req, res) => {
             res.status(404).json("Product not found!");
             return;
         }
-        const reviews = await Review.find({product: req.params.productId}).populate('user');
+        const reviews = await Review.find({product: req.params.productId}).populate('user', 'name role');
         reviews.map(review => {
             const {password, ...others} = review.user._doc;
             review.user = others;

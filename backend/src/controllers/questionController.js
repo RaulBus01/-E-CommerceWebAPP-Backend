@@ -79,18 +79,21 @@ exports.deleteReply = async (req, res) => {
 }
 exports.getQuestionByProduct = async (req, res) => {
     try { 
-        const questions = await Question.find({ productId: req.params.productId }).populate("replies").populate("user", "name role");
+        const questions = await Question.find({ productId: req.params.productId })
+            .populate({path: 'replies', populate: {path: 'user', select: 'name role'}}).populate('user', 'name role');
+        console.log(questions);
+        console.log(req.params.productId);
         if(!questions){
             return res.status(404).json({ message: 'No questions found for this product' });
         }
         const processedQuestions = questions.map(question => ({
             id: question._id,
             content: question.content,
-            user: question.user._id.toString(),
+            user: question.user,
             replies: question.replies.map(reply => ({
                 id: reply._id,
                 content: reply.content,
-                user: reply.user._id.toString(),
+                user: reply.user,
                 isDistributor: reply.isDistributor,
                 createdAt: reply.createdAt,
                 updatedAt: reply.updatedAt
