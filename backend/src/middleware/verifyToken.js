@@ -29,6 +29,7 @@ const verifyToken = (req, res, next) => {
 const verifyTokenAndAuthorization = (req, res, next) => {
     verifyToken(req, res, () => {
         const userId = req.params.id || req.body.id || req.body.userId || req.body.user;
+   
 
         if (req.user.id === userId)
         {

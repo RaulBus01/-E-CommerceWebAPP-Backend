@@ -5,6 +5,7 @@ const User = require('../models/User');
 exports.addReviewToProduct = async (req, res) => {
     try{
         const { productId, userId, rating, content } = req.body;
+        console.log(req.body);
         const product = await Product.findById(productId);
         if(!product){
             res.status(404).json("Product not found");
@@ -21,6 +22,7 @@ exports.addReviewToProduct = async (req, res) => {
             rating,
             content
         });
+        console.log(newReview);
         await newReview.save();
         
         const reviews = await Review.find({product: productId});
@@ -56,31 +58,30 @@ exports.getReviewsByProduct = async (req, res) => {
 }
 
 exports.getReviews = async (req, res) => {
-    try{
+    try {
         let reviews;
-        if(req.user.role === 'admin'){
+        const userRole = req.user.role;
+        const userId = req.user.id;
+
+        if (userRole === 'admin') {
             reviews = await Review.find().populate('product').populate('user');
-        }
-        if(req.user.role === 'customer'){
-            reviews = await Review.find({user: req.user.id}).populate('product').populate('user');
-        }
-        if(req.user.role === 'distributor'){
-            reviews = await Review.find({user: req.user.id}).populate('product').populate('user');
+        } else if (userRole === 'customer' || userRole === 'distributor') {
+            reviews = await Review.find({ user: userId }).populate('product').populate('user');
         }
 
-        if(reviews.length === 0){
+        if (!reviews || reviews.length === 0) {
             res.status(404).json("No reviews found!");
             return;
         }
-        if(reviews > 1){
-            reviews.map(review =>{
-                const {name,role} = review.user._doc;
-                review.user = {name,role};
-                return review;
-            })
-        }res.status(200).json(reviews);
 
-    }catch(error){
+        reviews = reviews.map(review => {
+            const { name, role } = review.user._doc;
+            review.user = { name, role };
+            return review;
+        });
+
+        res.status(200).json(reviews);
+    } catch (error) {
         res.status(500).json(error);
     }
 }
