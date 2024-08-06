@@ -1,11 +1,10 @@
 const { verifyTokenAndDistributor,verifyTokenAndEditProductAuthorization, verifyTokenAndAuthorizedDistributor } = require("../middleware/verifyToken");
 const router = require("express").Router();
 const productController = require("../controllers/productController");
-
-
+const { upload } = require("../middleware/gridFsStorage");
 
 //CREATE
-router.post("/add", verifyTokenAndAuthorizedDistributor,productController.createProduct); 
+router.post("/add", verifyTokenAndAuthorizedDistributor, upload.array('images', 5),  productController.createProduct); 
 //UPDATE
 router.put("/edit", verifyTokenAndEditProductAuthorization,productController.updateProduct);
 //DELETE
@@ -19,8 +18,6 @@ router.get("/findCategory/:category", productController.getProductsByCategory);
 //GET PRODUCTS BY DISTRIBUTOR
 router.get("/findDistributor/:id", verifyTokenAndDistributor, productController.getProductsByDistributor);
 
-
-
-
+router.get("/image/:productId", productController.getImage);
 
 module.exports = router;    

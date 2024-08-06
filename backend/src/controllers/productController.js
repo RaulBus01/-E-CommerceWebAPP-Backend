@@ -1,32 +1,40 @@
+const { gfs, upload } = require('../middleware/gridFsStorage');
 const Category = require('../models/Category');
 const Product = require('../models/Product');
-const Review = require('../models/Review');
 
 exports.createProduct = async (req, res) => {
-
-    const newProduct = new Product({
+    try {
+      const imageFiles = req.files;
+  
+      if (!imageFiles || imageFiles.length === 0) {
+        return res.status(400).json({ message: 'No image files uploaded' });
+      }
+  
+      const categoryExists = await Category.findById(req.body.categories);
+      if (!categoryExists) {
+        return res.status(400).json({ message: 'Category does not exist' });
+      }
+  
+      const newProduct = new Product({
         name: req.body.name,
         price: req.body.price,
         categories: req.body.categories,
         description: req.body.description,
-        image: req.body.image,
         stock: req.body.stock,
         distributor: req.user.id,
-    });
+      });
+      const savedProduct = await newProduct.save();
+
+      const imageUrls = imageFiles.map((file) => `/api/products/image/${file.filename}`);
+      
+      savedProduct.image = imageUrls;
+      await savedProduct.save();
     
-    try {
-        const categoryExists = await Category.findById(req.body.categories);
-        if (!categoryExists) {
-            return res.status(400).json("Category does not exist");
-        }
-        
-    
-        const savedProduct = await newProduct.save();
-        res.status(200).json(savedProduct);
+      res.status(200).json(savedProduct);
     } catch (err) {
-        res.status(500).json(err);
+      res.status(500).json({ error: err.message });
     }
-}
+  };
 exports.updateProduct = async (req, res) => {
     try {
         const product = await Product.findById(req.body.productId);
@@ -116,5 +124,21 @@ exports.getProductsByDistributor = async (req, res) => {
         res.status(200).json(filteredProducts);
     } catch (err) {
         res.status(500).json(err);
+    }   
+}
+exports.getImage = async (req, res) => {
+    try{
+        const {productId} = req.params;
+        console.log(productId);
+        const files = await gfs.find({'metadata.productId': productId}).toArray();
+        console.log(files);
+        if (!files || files.length === 0) {
+            return res.status(404).json({ message: 'File not found' });
+        }
+
+        const imageUrls = files.map((file) => `/api/products/image/${file.filename}`);
+        res.status(200).json(imageUrls);
+    } catch(error){
+        res.status(500).json(error);
     }
 }
