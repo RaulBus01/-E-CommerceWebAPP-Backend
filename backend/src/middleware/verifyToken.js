@@ -125,7 +125,9 @@ const verifyTokendAndAssociatedDistributor = async (req, res, next) => {
 const verifyTokenAndCancelOrderAuthorization = async (req, res, next) => {
     verifyToken(req, res, async () => {
         try {
+            console.log(req.params.id);
             const order = await Order.findById(req.params.id);
+            console.log(order);
             if (!order) {
                 return res.status(404).json("Order not found");
             }
@@ -134,7 +136,7 @@ const verifyTokenAndCancelOrderAuthorization = async (req, res, next) => {
             }
             if (req.user.role === "distributor") {
                 
-                if (order.distributor === req.user.id) {
+                if (order.distributor._id.toString() === req.user.id) {
                     return next();
                 }
             }
@@ -184,7 +186,9 @@ const verifyTokenAndEditOrderStatusAuthorization = async (req, res, next) => {
 const verifyTokenAndEditProductAuthorization = (req, res, next) => {
     verifyToken(req, res, async () => {
         try {
+            console.log(req.params.productId);
             const product = await Product.findById(req.params.productId);
+            
             if (!product) {
                 return res.status(404).json("Product not found");
             }

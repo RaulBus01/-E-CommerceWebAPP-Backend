@@ -5,20 +5,30 @@ const Product = require('../models/Product');
 exports.createProduct = async (req, res) => {
     try {
       const imageFiles = req.files;
+      const categoryArray = req.body.categories.split(',');
+     console.log(req.body);
   
       if (!imageFiles || imageFiles.length === 0) {
         return res.status(400).json({ message: 'No image files uploaded' });
       }
-  
-      const categoryExists = await Category.findById(req.body.categories);
-      if (!categoryExists) {
-        return res.status(400).json({ message: 'Category does not exist' });
-      }
+      
+      if (!categoryArray || categoryArray.length === 0) {
+        return res.status(400).json({ message: 'No categories selected' });
+    }
+
+    const categories = await Category.find({ _id: { $in: categoryArray } });
+    if (categories.length !== categoryArray.length) {
+        return res.status(400).json({ message: 'Invalid category' });
+    }
+
+        
+      
+     
   
       const newProduct = new Product({
         name: req.body.name,
         price: req.body.price,
-        categories: req.body.categories,
+        categories: categoryArray,
         description: req.body.description,
         stock: req.body.stock,
         distributor: req.user.id,
@@ -42,7 +52,7 @@ exports.createProduct = async (req, res) => {
   };
 exports.updateProduct = async (req, res) => {
     try {
-        const product = await Product.findById(req.body.productId);
+        const product = await Product.findById(req.params.productId);
         if(!product){
             res.status(404).json("Product not found");
             return;
@@ -83,7 +93,7 @@ exports.getProduct = async (req, res) => {
     try {
       const productId = req.params.id;
   
-      const product = await Product.findById(productId);
+      const product = await Product.findById(productId).populate("distributor", "name").populate("categories", "name").populate("reviews").populate("questions");
   
       if (!product) {
         return res.status(404).json({ message: 'Product not found' });

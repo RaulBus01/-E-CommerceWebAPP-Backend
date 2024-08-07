@@ -4,83 +4,82 @@ const User = require('../models/User');
 
 exports.createOrder = async (req, res) => {
     try {
-        const products = req.body.products;
-        const user = await User.findById(req.user.id).populate('customerInfo');
-     
-        if (!user) {
-            return res.status(400).json("User not found");
+      const products = req.body.products;
+      const user = await User.findById(req.user.id).populate('customerInfo');
+  
+      if (!user) {
+        return res.status(400).json("User not found");
+      }
+      if (!user.customerInfo.isVerified) {
+        return res.status(400).json("User is not verified");
+      }
+      if (!products || products.length === 0) {
+        return res.status(400).json("No products in cart");
+      }
+  
+      let totalPrice = 0;
+      const ordersByDistributor = new Map();
+  
+      for (const product of products) {
+        if (product.productId.length !== 24) {
+          return res.status(400).json(`Product ID is not valid`);
         }
-        if(!user.customerInfo.isVerified){
-            return res.status(400).json("User is not verified");
+        const checkProduct = await Product.findById(product.productId);
+        if (!checkProduct) {
+          return res.status(400).json(`Product not found: ${product.productId}`);
         }
-        if (!products || products.length === 0) {
-            return res.status(400).json("No products in cart"); 
+        if (checkProduct.stock < product.quantity) {
+          return res.status(400).json(`Product out of stock: ${product.productId}`);
         }
-
-        let totalPrice = 0;
-        const ordersByDistributor = new Map();
-
-        for (const product of products) {
-            console.log(product);
-            if (product.productId.length !== 24)
-            {
-                return res.status(400).json(`Product ID is not valid`);
-            }   
-            const checkProduct = await Product.findById(product.productId);
-            if (!checkProduct) {
-                return res.status(400).json(`Product not found: ${product.productId}`);
-            }
-
-            
-            if (checkProduct.stock < product.quantity) {
-                return res.status(400).json(`Product out of stock: ${product.productId}`);
-            }
-
-            const { price, distributor } = checkProduct;
-            totalPrice += price * product.quantity;
-
-            if (!ordersByDistributor.has(distributor)) {
-                ordersByDistributor.set(distributor, {
-                    products: [],
-                    totalPrice: 0
-                });
-            }
-            
-            ordersByDistributor.get(distributor).products.push(product);
-            ordersByDistributor.get(distributor).totalPrice += price * product.quantity;
+  
+        const { price, distributor } = checkProduct;
+        totalPrice += price * product.quantity;
+  
+        if (!ordersByDistributor.has(distributor)) {
+          ordersByDistributor.set(distributor, {
+            products: [],
+            totalPrice: 0
+          });
         }
-
-        const orders = [];
-        for (const [distributor, orderData] of ordersByDistributor) {
-            const newOrder = new Order({
-                user: req.user.id,
-                products: orderData.products,
-                name: req.body.name,
-                email: req.user.email,
-                phoneNumber: req.body.phoneNumber,
-                address: {
-                    country: req.body.address.country,
-                    county: req.body.address.county,
-                    city: req.body.address.city,
-                    street: req.body.address.street,
-                    number: req.body.address.number,
-                    zip: req.body.address.zip,
-                },
-                paymentMethod: req.body.paymentMethod,
-                totalPrice: orderData.totalPrice,
-                distributor: distributor,
-            });
-            orders.push(await newOrder.save());
-        }
-
-        res.status(201).json({
-            message: "Orders created successfully",
-            orders,
+  
+        ordersByDistributor.get(distributor).products.push({
+          product: checkProduct._id,
+          quantity: product.quantity
         });
+        ordersByDistributor.get(distributor).totalPrice += price * product.quantity;
+      }
+  
+      const orders = [];
+      for (const [distributor, orderData] of ordersByDistributor) {
+        const newOrder = new Order({
+          user: req.user.id,
+          products: orderData.products,
+          name: req.body.name,
+          email: req.user.email,
+          phoneNumber: req.body.phoneNumber,
+          address: {
+            country: req.body.address.country,
+            county: req.body.address.county,
+            city: req.body.address.city,
+            street: req.body.address.street,
+            number: req.body.address.number,
+            zip: req.body.address.zip,
+          },
+          paymentMethod: req.body.paymentMethod,
+          totalPrice: orderData.totalPrice,
+          distributor: distributor,
+        });
+        orders.push(await newOrder.save());
+      }
+  
+      res.status(201).json({
+        message: "Orders created successfully",
+        orders,
+      });
     } catch (err) {
-        res.status(500).json({ message: "An error occurred", error: err.message });
+      res.status(500).json({ message: "An error occurred", error: err.message });
     }
-};
+  };
 
 
 const getValidStatuses = (role) => {
@@ -155,8 +154,9 @@ exports.editOrderStatus = async (req, res) => {
 
 exports.getOrderDetails = async(req, res) => {
     try{
-        const order = await Order.findById(req.params.id).populate('products.product').populate('user').populate('distributor');
         
+        const order = await Order.findById(req.params.id).populate('products.product').populate('user').populate('distributor');
+        console.log(order.products);
         if(!order){
             return res.status(404).json({message:"Order not found"});
             
@@ -166,14 +166,16 @@ exports.getOrderDetails = async(req, res) => {
             return res.status(200).json({message:"Order found",order});
         }
        
-        if (req.user.role === 'customer' && order.user.id !== req.user.id) {
+        if (req.user.role === 'customer' && order.user._id.toString() !== req.user.id) {
             return res.status(401).json({message:"You are not authorized to view this order"});
         }
-        if(req.user.role === 'distributor' && order.distributor.id !== req.user.id){
+        if(req.user.role === 'distributor' && order.distributor._id.toString() !== req.user.id){
             return res.status(401).json({message:"You are not authorized to view this order"});
         }
+       
         const {name,role} = order.user._doc;
         order.user = {name,role};
+      
 
         res.status(200).json({message:"Order found",order});
     } catch(error){
