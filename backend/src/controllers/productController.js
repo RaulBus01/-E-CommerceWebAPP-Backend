@@ -1,4 +1,3 @@
-const { gfs, upload } = require('../middleware/gridFsStorage');
 const Category = require('../models/Category');
 const Product = require('../models/Product');
 

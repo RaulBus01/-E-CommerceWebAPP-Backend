@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { upload, getGfs } = require('../middleware/gridFsStorage');
+const { getGfs } = require('../middleware/gridFsStorage');
 
 router.get('/uploads/:filename', (req, res) => {
     const gfs = getGfs();
