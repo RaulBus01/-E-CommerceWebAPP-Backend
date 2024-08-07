@@ -55,7 +55,7 @@ productSchema.set('toJSON', { virtuals: true });
 productSchema.virtual('questions',{
     ref: 'Question',
     localField: '_id',
-    foreignField: 'productId'
+    foreignField: 'product'
 });
 
 const Product = mongoose.model('Product', productSchema);
