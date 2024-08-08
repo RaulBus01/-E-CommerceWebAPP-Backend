@@ -5,14 +5,24 @@ exports.createProduct = async (req, res) => {
     try {
       const imageFiles = req.files;
       const categoryArray = req.body.categories.split(',');
-     console.log(req.body);
+      console.log(req.body);
+   
   
       if (!imageFiles || imageFiles.length === 0) {
         return res.status(400).json({ message: 'No image files uploaded' });
       }
+      if(req.body.price <= 0)
+        {
+            return res.status(400).json("Price must be greater than 0");
+        }
+      if(req.body.stock <= 0)
+        {
+            return res.status(400).json("Stock must be greater than 0");
+        }
+            
   
-      const categoriesArray = req.body.categories;
-    categoriesArray.forEach(async (category) => {
+      
+    categoryArray.forEach(async (category) => {
         const categoryExists = await Category.findById(category);
         if (!categoryExists) {
             res.status(400).json("Category does not exist");
@@ -35,7 +45,6 @@ exports.createProduct = async (req, res) => {
         });
     
 
-        console.log(imageUrls);
       
       savedProduct.image = imageUrls;
       await savedProduct.save();
@@ -45,31 +54,67 @@ exports.createProduct = async (req, res) => {
       res.status(500).json({ error: err.message });
     }
   };
-exports.updateProduct = async (req, res) => {
+  exports.updateProduct = async (req, res) => {
     try {
-        const product = await Product.findById(req.params.productId);
-        if(!product){
-            res.status(404).json("Product not found");
-            return;
+      const product = await Product.findById(req.params.productId);
+      console.log(req.body);
+      if (!product) {
+        return res.status(404).json({ message: 'Product not found' });
+      }
+  
+      if (Object.prototype.hasOwnProperty.call(req.body, 'distributorId') || 
+          Object.prototype.hasOwnProperty.call(req.body, 'ratingProduct') || 
+          Object.prototype.hasOwnProperty.call(req.body, 'numberOfReviews')) {
+        return res.status(403).json({ message: 'You are not authorized to edit these fields' });
+      }
+  
+      if (req.body.price <= 0) {
+        return res.status(400).json({ message: 'Price must be greater than 0' });
+      }
+  
+      if (req.body.stock < 0) {
+        return res.status(400).json({ message: 'Stock must be greater than or equal to 0' });
+      }
+  
+      const { name, description, price, stock, categories } = req.body;
+      console.log(categories);
+      const categoryArray = categories.split(',');
+  
+      categoryArray.forEach(async (category) => {
+        const categoryExists = await Category.findById(category);
+        if (!categoryExists) {
+          return res.status(400).json({ message: `Category ${category} does not exist` });
         }
-        if (req.body.hasOwnProperty("distributorId")) {
-            return res.status(403).json("You are not authorized to edit the distributorId field");
-        }
-       
-        Object.keys(req.body).forEach((key) => {
-            product[key] = req.body[key];
+      });
+  
+      let imageUrls = product.image;
+      if (req.files && req.files.images) {
+        const imageFiles = Array.isArray(req.files.images) ? req.files.images : [req.files.images];
+        imageUrls = imageFiles.map((file) => {
+          return `${process.env.BASE_URL}/api/uploads/${file.filename}`;
         });
-        const savedProduct = await product.save();
-        
-        res.status(200).json(savedProduct);
+      }
+  
+      product.name = name || product.name;
+      product.price = price || product.price;
+      product.categories = categoryArray || product.categories;
+      product.description = description || product.description;
+      product.stock = stock || product.stock;
+      product.image = imageUrls;
+      product.isActive = req.body.isActive || product.isActive;
+  
+      const savedProduct = await product.save();
+      res.status(200).json(savedProduct);
     } catch (err) {
-        res.status(500).json(err);
+      res.status(500).json({ error: err.message });
     }
-}
+  };
 exports.deleteProduct = async (req, res) => {
         try {
-            console.log(req.params.productId);
-            await Product.findByIdAndDelete(req.params.productId);
+            
+            await Product.findByIdAndUpdate(req.params.productId, {
+                isActive: false,
+            });
             res.status(200).json("Product has been deleted");
         } catch (err) {
             res.status(500).json(err);  
@@ -77,7 +122,7 @@ exports.deleteProduct = async (req, res) => {
 }
 exports.getAllProducts = async (req, res) => {
     try {
-        const products = await Product.find().populate("distributor", "name").populate("categories", "name");
+        const products = await Product.find().populate("reviews", "content title rating createdAt").populate("questions").populate("distributor", "name ");
         res.status(200).json(products);
     } catch (err) {
         res.status(500).json(err);

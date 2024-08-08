@@ -42,6 +42,12 @@ const productSchema = new mongoose.Schema({
         type: Number,
         required: false,
     },
+    isActive:{
+        type: Boolean,
+        default: true,
+        
+    },
+    
 }, {timestamps: true});
 productSchema.virtual('reviews',{
     ref: 'Review',

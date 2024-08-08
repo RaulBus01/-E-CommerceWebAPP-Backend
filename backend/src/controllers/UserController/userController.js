@@ -17,7 +17,23 @@ exports.updateUser = async (req, res) => {
 
         updateFields.password = CryptoJS.AES.encrypt(password, process.env.PASS_SECRET).toString();
     }
+    if(updateFields.hasOwnProperty('isAuthorized') && req.user.role !== 'admin')
+    {
+        return res.status(400).json("You can't change the authorization status");
+    }
+    if(updateFields.hasOwnProperty('isVerified') && req.user.role !== 'admin')
+    {
+        return res.status(400).json("You can't change the verification status");
+    }
+    if(updateFields.hasOwnProperty('role') && req.user.role !== 'admin')
+    {
+        return res.status(400).json("You can't change the role");
 
+    }
+    if(updateFields.hasOwnProperty('phoneNumber') && updateFields.phoneNumber.length !== 10)
+    {
+        return res.status(400).json("Phone number must have 10 digits");
+    }
     try {
         console.log(req.user.id);
         const user = await User.findById(id);
@@ -55,10 +71,7 @@ exports.updateUser = async (req, res) => {
             if(!customer.hasOwnProperty('payment') && updateFields.payment){
                 customer.payment = {};
             }
-            if (updateFields.hasOwnProperty('isVerified') )
-            {
-                return res.status(400).json("You can't change the verification status");
-            }
+            
        
             await Customer.findByIdAndUpdate(
                 customer._id,

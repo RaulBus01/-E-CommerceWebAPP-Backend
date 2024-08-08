@@ -164,16 +164,18 @@ const verifyTokenAndEditOrderStatusAuthorization = async (req, res, next) => {
             }
             if(req.user.role === "distributor")
             {
-                const order = await Order.findById(req.params.id).populate('distributor');
-                console.log(order);
-                if (!order) {
-                    return res.status(404).json({message:"Order not found"});
+                const order = await Order.findById(req.params.id);
+                if(!order)
+                {
+                    return res.status(404).json("Order not found");
                 }
-                if (order.distributor === req.user.id) {
-                    next();
+                if(order.distributor.toString() === req.user.id)
+                {
+                    return next();
                 }
+                res.status(403).json("You are not authorized to edit this order");
+              
             }
-            res.status(403).json({message:"You are not authorized to edit this order"});
         }
         catch (err) {
             res.status(500).json({ message:"An error occurred",error: err.message });
@@ -187,7 +189,7 @@ const verifyTokenAndEditOrderStatusAuthorization = async (req, res, next) => {
 const verifyTokenAndEditProductAuthorization = (req, res, next) => {
     verifyToken(req, res, async () => {
         try {
-            console.log(req.params.productId);
+     
             const product = await Product.findById(req.params.productId);
             
             if (!product) {
