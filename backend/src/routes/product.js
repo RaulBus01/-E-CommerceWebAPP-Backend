@@ -6,7 +6,7 @@ const { upload } = require("../middleware/gridFsStorage");
 //CREATE
 router.post("/add", verifyTokenAndAuthorizedDistributor, upload.array('images', 5),  productController.createProduct); 
 //UPDATE
-router.put("/edit", verifyTokenAndEditProductAuthorization,productController.updateProduct);
+router.put("/edit/:productId", verifyTokenAndEditProductAuthorization,productController.updateProduct);
 //DELETE
 router.delete("/delete/:productId", verifyTokenAndEditProductAuthorization, productController.deleteProduct);
 //GET PRODUCT BY ID

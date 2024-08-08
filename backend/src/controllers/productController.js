@@ -4,6 +4,8 @@ const Product = require('../models/Product');
 exports.createProduct = async (req, res) => {
     try {
       const imageFiles = req.files;
+      const categoryArray = req.body.categories.split(',');
+     console.log(req.body);
   
       if (!imageFiles || imageFiles.length === 0) {
         return res.status(400).json({ message: 'No image files uploaded' });
@@ -21,7 +23,7 @@ exports.createProduct = async (req, res) => {
     const newProduct = new Product({
         name: req.body.name,
         price: req.body.price,
-        categories: req.body.categories,
+        categories: categoryArray,
         description: req.body.description,
         stock: req.body.stock,
         distributor: req.user.id,
@@ -45,7 +47,7 @@ exports.createProduct = async (req, res) => {
   };
 exports.updateProduct = async (req, res) => {
     try {
-        const product = await Product.findById(req.body.productId);
+        const product = await Product.findById(req.params.productId);
         if(!product){
             res.status(404).json("Product not found");
             return;

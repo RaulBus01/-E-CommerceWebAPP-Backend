@@ -14,6 +14,7 @@ const storage = new GridFsStorage({
   db: database,
   options: { useUnifiedTopology: true, useNewUrlParser: true },
   file: (req, file) => {
+    console.log(file);
     const match = ['image/png', 'image/jpeg', 'image/jpg'];
 
     if (match.indexOf(file.mimetype) === -1) {

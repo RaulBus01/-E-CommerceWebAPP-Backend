@@ -6,7 +6,7 @@ const router = require('express').Router();
 //CREATE ORDER(USER)
 router.post("/createOrder",verifyTokenAndCustomer, orderController.createOrder);
 //CANCEL ORDER
-router.put("/cancelOrder/:id", verifyTokenAndCancelOrderAuthorization, orderController.cancelOrder);
+router.put("/cancel/:id", verifyTokenAndCancelOrderAuthorization, orderController.cancelOrder);
 //GET ORDER BY ID
 router.get("/order/:id",verifyToken, orderController.getOrderDetails);
 //GET ALL ORDERS(ADMIN)
