@@ -1,5 +1,4 @@
-const express = require('express');
-const database = require('./config/database'); 
+const express = require('express'); 
 const authUserRoute = require('./routes/auth/authUser');
 const userRoutes = require('./routes/user');
 
@@ -11,6 +10,7 @@ const voucherRoutes = require('./routes/voucher');
 const favouritesRoutes = require('./routes/favourites');
 const reviewsRoutes = require('./routes/review');
 const questionRoutes = require('./routes/question');
+const replyRoutes = require('./routes/reply');
 const paymentRoutes = require('./routes/stripe');
 const categoriesRoutes = require('./routes/categories');
 const dotenv = require('dotenv');
@@ -34,6 +34,7 @@ app.use("/api/voucher",voucherRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/products",productRoutes);
 app.use("/api/question",questionRoutes);
+app.use("/api/reply", replyRoutes);
 app.use("/api/favourites",favouritesRoutes);
 app.use("/api/reviews", reviewsRoutes);
 app.use("/api/payment", paymentRoutes);

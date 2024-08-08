@@ -1,10 +1,7 @@
 const Question = require('../models/Question');
-const Reply = require('../models/Reply');
-const Product = require('../models/Product');
 const { default: mongoose } = require('mongoose');
 
-exports.addQuestion = async (req, res) => {
-    console.log(req.user.id);   
+exports.addQuestion = async (req, res) => {  
         const newQuestion = new Question({
             user: req.user.id,
             productId: req.body.productId,
@@ -12,26 +9,11 @@ exports.addQuestion = async (req, res) => {
         });
         try {   
             const savedQuestion = await newQuestion.save();
-            const populatedQuestion = await Question.findById(savedQuestion._id).populate('user', 'name email role');
+            const populatedQuestion = await Question.findById(savedQuestion._id).populate('user', 'name role');
             res.status(200).json({ message: 'Question added', question: populatedQuestion });
         } catch (err) {
             res.status(500).json({ message: 'Error adding question', error: err.message });
         }
-}
-exports.addReply = async (req, res) => {
-    const newReply = new Reply({
-        user: req.user.id,
-        questionId: req.body.questionId,
-        content: req.body.content,
-    });
-    try {
-        const savedReply = await newReply.save();
-        const populatedReply = await Reply.findById(savedReply._id).populate('user', 'name email role');
-        res.status(200).json({ message: 'Reply added', reply: populatedReply });
-    } catch (err) {
-        res.status(500).json({ message: 'Error adding reply', error: err.message });
-    }
-
 }
 exports.updateQuestion = async (req, res) => {
     try {
@@ -64,25 +46,10 @@ exports.deleteQuestion = async (req, res) => {
             res.status(500).json({ message: "Error deleting question", error: err.message });
         }
 }
-exports.deleteReply = async (req, res) => {
-    try {
-        const result = await Reply.findByIdAndDelete
-            (req.body.replyId);
-        if (!result) {
-            res.status(404).json({ message: "Reply not found" });
-            return;
-        }
-        res.status(200).json({ message: "Reply has been deleted" });
-    }catch (err) {
-        res.status(500).json({ message: "Error deleting reply", error: err.message });
-    }
-}
 exports.getQuestionByProduct = async (req, res) => {
     try { 
         const questions = await Question.find({ productId: req.params.productId })
             .populate({path: 'replies', populate: {path: 'user', select: 'name role'}}).populate('user', 'name role');
-        console.log(questions);
-        console.log(req.params.productId);
         if(!questions){
             return res.status(404).json({ message: 'No questions found for this product' });
         }

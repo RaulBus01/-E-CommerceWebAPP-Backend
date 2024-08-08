@@ -33,7 +33,7 @@ exports.addReviewToProduct = async (req, res) => {
         product.numberOfReviews = reviews.length;
         await product.save();
 
-        res.status(200).json(product);
+        res.status(200).json(newReview);
     } catch(error){
         res.status(500).json(error);
     }
@@ -42,11 +42,13 @@ exports.addReviewToProduct = async (req, res) => {
 exports.getReviewsByProduct = async (req, res) => {
     try{
         const product = await Product.findById(req.params.productId);
+        console.log(product);
         if(!product){
             res.status(404).json("Product not found!");
             return;
         }
         const reviews = await Review.find({product: req.params.productId}).populate('user', 'name role');
+        console.log(reviews);
         reviews.map(review => {
             const {password, ...others} = review.user._doc;
             review.user = others;
