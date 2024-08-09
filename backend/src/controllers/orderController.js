@@ -104,7 +104,7 @@ const checkOrderStatus = (order, res) => {
 };
 exports.cancelOrder = async (req, res) => {
     try {
-        const order = await Order.findById(req.params.id);
+        const order = await Order.findOne({orderNumber:req.params.id});
         if (!order) {
             return res.status(404).json({ message: "Order not found" });
         }
@@ -123,7 +123,7 @@ exports.cancelOrder = async (req, res) => {
 
 exports.editOrderStatus = async (req, res) => {
     try {
-        const order = await Order.findById(req.params.id);
+        const order = await Order.findOne({orderNumber:req.params.id});
         if (!order) {
             return res.status(404).json({ message: "Order not found" });
         }
@@ -155,7 +155,7 @@ exports.editOrderStatus = async (req, res) => {
 exports.getOrderDetails = async(req, res) => {
     try{
         
-        const order = await Order.findById(req.params.id).populate('products.product').populate('user').populate('distributor');
+        const order = await Order.findOne({orderNumber:req.params.id}).populate('products.product').populate('user').populate('distributor');
         console.log(order.products);
         if(!order){
             return res.status(404).json({message:"Order not found"});

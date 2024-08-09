@@ -64,6 +64,10 @@ const OrderSchema= new mongoose.Schema({
             required: true,
         },
     },
+    orderNumber: {
+        type: String,
+        unique: true,
+    },
     totalPrice: {
         type: Number,
         required: true,
@@ -81,6 +85,32 @@ const OrderSchema= new mongoose.Schema({
       }
     
 }, {timestamps: true});
+
+const CounterSchema = new mongoose.Schema({
+    _id: { type: String, required: true },
+    seq: { type: Number, default: 1000},
+});
+const Counter = mongoose.model('Counter', CounterSchema);
+
+OrderSchema.pre('save', function(next) {
+    const doc = this;
+    if(!doc.isNew)
+    {
+        next();
+    }
+    Counter.findByIdAndUpdate(
+        { _id: 'orderNumber' },
+        { $inc: { seq: 1 } },
+        { new: true, upsert: true }
+    )
+    .then(function(counter) {
+        doc.orderNumber = counter.seq.toString();
+        next();
+    })
+    .catch(function(error) {
+        return next(error);
+    });
+});
 
 const Order = mongoose.model('Order', OrderSchema);
 module.exports = Order;

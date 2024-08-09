@@ -127,7 +127,7 @@ const verifyTokenAndCancelOrderAuthorization = async (req, res, next) => {
     verifyToken(req, res, async () => {
         try {
             console.log(req.params.id);
-            const order = await Order.findById(req.params.id);
+            const order = await Order.findOne({orderNumber:req.params.id});
             console.log(order);
             if (!order) {
                 return res.status(404).json("Order not found");
@@ -164,7 +164,7 @@ const verifyTokenAndEditOrderStatusAuthorization = async (req, res, next) => {
             }
             if(req.user.role === "distributor")
             {
-                const order = await Order.findById(req.params.id);
+                const order = await Order.findOne({orderNumber:req.params.id});
                 if(!order)
                 {
                     return res.status(404).json("Order not found");
