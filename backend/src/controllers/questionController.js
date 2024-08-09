@@ -81,7 +81,13 @@ exports.getQuestionByUser = async (req, res) => {
         console.log(req.user.id);
         console.log(req.params.userId);
         let questions = null;
-        if(req.user.role === "admin" || (req.user.role === "customer" && req.user.id === req.params.userId)){
+        if(req.user.role === "admin"){
+            questions = await Question.find().populate({
+                "path": "replies",
+                "options": { "sort": { "createdAt": -1 } }
+            });
+        }
+        if(req.user.role === "customer" && req.user.id === req.params.userId){
             questions = await Question.find({ user: req.params.userId }).populate({
                 path: 'replies',
                 options: { sort: { createdAt: -1 } } 
@@ -115,3 +121,4 @@ exports.getQuestionByUser = async (req, res) => {
         res.status(500).json({ message: 'Error fetching questions', error: err.message });
     }
 }
+
