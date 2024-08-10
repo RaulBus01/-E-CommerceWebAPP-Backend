@@ -19,6 +19,7 @@ exports.deleteReply = async (req, res) => {
     try {
         const result = await Reply.findByIdAndDelete
             (req.body.replyId);
+        console.log(result);
         if (!result) {
             res.status(404).json({ message: "Reply not found" });
             return;

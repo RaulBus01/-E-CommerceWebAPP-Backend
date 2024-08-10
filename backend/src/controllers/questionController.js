@@ -82,18 +82,14 @@ exports.getQuestionByUser = async (req, res) => {
         console.log(req.params.userId);
         let questions = null;
         if(req.user.role === "admin"){
-            questions = await Question.find().populate({
-                "path": "replies",
-                "options": { "sort": { "createdAt": -1 } }
-            });
+            questions = await Question.find().populate({path: 'replies', populate: {path: 'user', select: 'name role'}}).populate('user', 'name role');
+            
         }
         if(req.user.role === "customer" && req.user.id === req.params.userId){
-            questions = await Question.find({ user: req.params.userId }).populate({
-                path: 'replies',
-                options: { sort: { createdAt: -1 } } 
-            });
+            questions = await Question.find({ user: req.params.userId }).populate({path: 'replies', populate: {path: 'user', select: 'name role'}}).populate('user', 'name role');
         }
-        if((req.user.role === "customer" && req.user.id !== req.params.userId) || (req.user.role === "distributor")){
+        console.log(req.user.id === req.params.userId);
+        if((req.user.role === "customer" && req.user.id !== req.params.userId)){
             return res.status(500).json({ message: "Unauthorized" });
         }
         if (!questions) {
@@ -102,11 +98,11 @@ exports.getQuestionByUser = async (req, res) => {
         const processedQuestions = questions.map(question => ({
             id: question._id,
             content: question.content,
-            user: question.user.toString(),
+            user: question.user,
             replies: question.replies.map(reply => ({
                 id: reply._id,
                 content: reply.content,
-                user: reply.user.toString(),
+                user: reply.user,
                 isDistributor: reply.isDistributor,
                 createdAt: reply.createdAt,
                 updatedAt: reply.updatedAt

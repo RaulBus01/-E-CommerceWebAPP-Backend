@@ -91,7 +91,11 @@ exports.getReviews = async (req, res) => {
 
 exports.deleteReview = async (req, res) => {
     try{
-        await Review.findByIdAndRemove(req.body.id);
+        const review = await Review.findByIdAndDelete(req.body.reviewId);
+        if(!review){
+            res.status(404).json("Review not found!");
+            return;
+        }
         res.status(200).json("Review deleted successfully!");
     }catch(error){
         res.status(500).json(error);
