@@ -1,6 +1,7 @@
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const User = require('../models/User');
+const { confirmOrderEmail } = require('./emailController');
 
 exports.createOrder = async (req, res) => {
     try {
@@ -76,6 +77,7 @@ exports.createOrder = async (req, res) => {
         message: "Orders created successfully",
         orders,
       });
+      await confirmOrderEmail(req.user.email, orders);
     } catch (err) {
       res.status(500).json({ message: "An error occurred", error: err.message });
     }
