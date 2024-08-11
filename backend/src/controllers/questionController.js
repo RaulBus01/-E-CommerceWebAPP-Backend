@@ -4,10 +4,12 @@ const { default: mongoose } = require('mongoose');
 exports.addQuestion = async (req, res) => {  
         const newQuestion = new Question({
             user: req.user.id,
-            productId: req.body.productId,
+            product: req.body.product,
             content: req.body.content,
         });
+
         try {   
+            
             const savedQuestion = await newQuestion.save();
             const populatedQuestion = await Question.findById(savedQuestion._id).populate('user', 'name role');
             res.status(200).json({ message: 'Question added', question: populatedQuestion });
@@ -81,14 +83,15 @@ exports.getQuestionByUser = async (req, res) => {
         console.log(req.user.id);
         console.log(req.params.userId);
         let questions = null;
+        
         if(req.user.role === "admin"){
-            questions = await Question.find().populate({path: 'replies', populate: {path: 'user', select: 'name role'}}).populate('user', 'name role');
-            
+
+            questions = await Question.find().populate("user", "name role").populate("product","name images").populate({path: 'replies', populate: {path: 'user', select: 'name role'}});
+        
         }
         if(req.user.role === "customer" && req.user.id === req.params.userId){
-            questions = await Question.find({ user: req.params.userId }).populate({path: 'replies', populate: {path: 'user', select: 'name role'}}).populate('user', 'name role');
+            questions = await Question.find({ user: req.params.userId }).populate({path: 'replies', populate: {path: 'user', select: 'name role'}}).populate('user', 'name role').populate('product','name images');
         }
-        console.log(req.user.id === req.params.userId);
         if((req.user.role === "customer" && req.user.id !== req.params.userId)){
             return res.status(500).json({ message: "Unauthorized" });
         }
@@ -99,6 +102,7 @@ exports.getQuestionByUser = async (req, res) => {
             id: question._id,
             content: question.content,
             user: question.user,
+            product: question.product,
             replies: question.replies.map(reply => ({
                 id: reply._id,
                 content: reply.content,
