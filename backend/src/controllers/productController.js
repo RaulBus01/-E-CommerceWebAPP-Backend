@@ -10,7 +10,6 @@ exports.createProduct = async (req, res) => {
       }
 
       const categoryArray = req.body.categories.split(',');
-      console.log(req.body);
    
   
       if (!imageFiles || imageFiles.length === 0) {
@@ -63,7 +62,6 @@ exports.createProduct = async (req, res) => {
   exports.updateProduct = async (req, res) => {
     try {
       const product = await Product.findById(req.params.productId);
-      
       if (!product) {
         return res.status(404).json({ message: 'Product not found' });
       }
@@ -170,18 +168,20 @@ exports.getProduct = async (req, res) => {
       res.status(500).json({ message: 'Error fetching product', error: err.message });
     }
   };
+  
 exports.getProductsByCategory = async (req, res) => {
     try {
-        const products = await Product.find({
-            category: {
-                $in: [req.params.category],
-            },
-        });
-        res.status(200).json({ message: 'Products found', products });
+      const category = await Category.findOne({ name: req.params.category });
+      const products = await Product.find({
+        categories: category._id,
+      });
+
+        res.status(200).json(products);
     } catch (err) {
         res.status(500).json({ message: 'Error fetching products', error: err.message });
     }
 }
+
 
 exports.getProductsByDistributor = async (req, res) => {
     try {
@@ -229,6 +229,34 @@ exports.searchProducts = async (req, res) => {
         }).limit(5);
 
         res.status(200).json({ products, categories });
+    } catch (err) {
+        res.status(500).json(err);
+    }
+}
+
+exports.filterProducts = async (req, res) => {
+    try {
+        const { price, brand, availability, category } = req.body;
+        const fetchedCategory = await Category.findOne({ name: category });
+        let products = await Product.find({
+        categories: fetchedCategory._id,
+      });
+        if (price.length) {
+            products = products.filter((product) => {
+              return product.price >= price[0] && product.price <= price[1];
+            });
+        }
+        if (brand.length) {
+            products = products.filter((product) => brand.includes(product.brand));
+        }
+        if (availability) {
+            if(availability.inStock && !availability.outOfStock){
+              products = products.filter((product) => product.stock > 0);
+            }else if( !availability.inStock && availability.outOfStock){
+              products = products.filter((product) => product.stock <= 0);
+            }
+        }
+        res.status(200).json(products);
     } catch (err) {
         res.status(500).json(err);
     }
