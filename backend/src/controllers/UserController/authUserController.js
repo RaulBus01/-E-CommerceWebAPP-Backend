@@ -5,8 +5,7 @@ const Distributor = require('../../models/Distributor');
 const Customer = require('../../models/Customer');
 const Favourites = require('../../models/Favourites');
 const CryptoJS = require('crypto-js');
-const UserVerificationToken = require('../../models/UserVerificationToken');
-const crypto = require('crypto');
+
 const jwt = require('jsonwebtoken');
 const { verifyEmail } = require('../emailController');
 
@@ -89,14 +88,7 @@ exports.registerUser = async (req, res) => {
         }
 
       
-        const verificationToken = new UserVerificationToken({
-            userId: user._id,
-            token: crypto.randomBytes(16).toString('hex')
-        });
-        const savedVerificationToken = await verificationToken.save();
-        
-        
-        const link = `http://localhost:3001/api/users/confirmAccount/${savedVerificationToken.token}`;
+       
         const {password, ...others} = user._doc;
         const accessToken = jwt.sign(
             { 
@@ -107,12 +99,13 @@ exports.registerUser = async (req, res) => {
                 customerInfo: user.customerInfo,
                 distributorInfo: user.distributorInfo,
                 createdAt: user.createdAt,
-                phoneNumber: user.phoneNumber,
+                updatedAt: user.updatedAt,
               
             },
             process.env.JWT_SECRET,
             { expiresIn: "3d" }
         );
+        console.log(user);
         res.cookie("accessToken", accessToken, {
            
             expires: new Date(Date.now() + tokenExpiration), 
@@ -123,7 +116,7 @@ exports.registerUser = async (req, res) => {
         });
         if(user.role ==='customer')
         {
-            await verifyEmail(user.email, link);
+            await verifyEmail(user);
             
            
                 

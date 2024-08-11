@@ -55,7 +55,7 @@ exports.createProduct = async (req, res) => {
       savedProduct.images = imageUrls;
       await savedProduct.save();
     
-      res.status(200).json(savedProduct);
+      res.status(200).json({ message: 'Product added successfully', product: savedProduct });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
@@ -130,7 +130,7 @@ exports.createProduct = async (req, res) => {
       product.isActive = req.body.isActive || product.isActive;
   
       const savedProduct = await product.save();
-      res.status(200).json(savedProduct);
+      res.status(200).json({ message: 'Product updated successfully', product: savedProduct });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
@@ -141,7 +141,7 @@ exports.deleteProduct = async (req, res) => {
             await Product.findByIdAndUpdate(req.params.productId, {
                 isActive: false,
             });
-            res.status(200).json("Product has been deleted");
+            res.status(200).json({ message: 'Product deleted successfully' });
         } catch (err) {
             res.status(500).json(err);  
     }
@@ -149,7 +149,7 @@ exports.deleteProduct = async (req, res) => {
 exports.getAllProducts = async (req, res) => {
     try {
         const products = await Product.find().populate("reviews", "content title rating createdAt").populate("questions").populate("distributor", "name ");
-        res.status(200).json(products);
+        res.status(200).json({message: 'All products', products});
     } catch (err) {
         res.status(500).json(err);
     }
@@ -165,7 +165,7 @@ exports.getProduct = async (req, res) => {
         return res.status(404).json({ message: 'Product not found' });
       }
     
-        res.status(200).json(product);
+        res.status(200).json({ message: 'Product found', product });
     } catch (err) {
       res.status(500).json({ message: 'Error fetching product', error: err.message });
     }
@@ -177,9 +177,9 @@ exports.getProductsByCategory = async (req, res) => {
                 $in: [req.params.category],
             },
         });
-        res.status(200).json(products);
+        res.status(200).json({ message: 'Products found', products });
     } catch (err) {
-        res.status(500).json(err);
+        res.status(500).json({ message: 'Error fetching products', error: err.message });
     }
 }
 
@@ -209,7 +209,7 @@ exports.getProductsByDistributor = async (req, res) => {
 
         console.log(filteredProducts);
 
-        res.status(200).json(filteredProducts);
+        res.status(200).json({ message: 'Products found', products: filteredProducts });
     } catch (err) {
         res.status(500).json(err);
     }   
@@ -229,7 +229,6 @@ exports.searchProducts = async (req, res) => {
         }).limit(5);
 
         res.status(200).json({ products, categories });
-        console.log(products, categories);
     } catch (err) {
         res.status(500).json(err);
     }

@@ -10,6 +10,8 @@ const Reply = require("../../models/Reply");
 const Cart = require("../../models/Cart");
 const Favourites = require("../../models/Favourites");
 const mongoose = require("mongoose");
+const UserVerificationToken = require("../../models/UserVerificationToken");
+const { verifyEmail } = require("../emailController");
 
 
 const jwt = require("jsonwebtoken");
@@ -254,6 +256,92 @@ exports.getUser = async (req, res) => {
         res.status(500).json(err);
     }
 }
+exports.resendVerificationEmail = async (req, res) => {
+    try {
+       
+        const user = await User.findById(req.user.id
+        ).populate('customerInfo').populate('distributorInfo');
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        if (user.isVerified) {
+            return res.status(400).json({ message: "User is already verified" });
+        }
+     
+        
+        res.status(200).json({ message: "Verification email sent" });
+        await verifyEmail(user);
+    } catch (err) {
+        res.status(500).json(err);
+    }
+}
+exports.confirmAccount = async (req, res)=>
+    {
+        try{
+            const token = await UserVerificationToken.findOne({
+                token: req.params.token,
+            });
+            const user = await User.findById(token.userId);
+            if (!user) {
+                return res.status(404).send("User not found.");
+            }
+            if (user.role === 'customer') {
+                const customer = await Customer.findById(user._id);
+                if (!customer) {
+                  return res.status(404).send("Customer not found.");
+                }
+                
+                customer.isVerified = true;
+                await customer.save();
+
+                const updateToken = jwt.sign({ 
+                    id: customer._id,
+                    role: user.role,
+                    email: user.email,
+                    name: user.name,
+                    phoneNumber: user.phoneNumber,
+                    customerInfo: {
+                      isVerified: customer.isVerified,
+                        address: customer.address,
+                        payment : customer.payment,
+                        createdAt: customer.createdAt,
+                        updatedAt: customer.updatedAt
+
+                    },
+                    createdAt: user.createdAt,
+                    updatedAt: user.updatedAt
+                  }, process.env.JWT_SECRET, { expiresIn: "3d" });
+            
+                
+                
+              
+                
+
+
+                  
+       
+                   const tokenExpiration = 1000 * 60 * 60 * 24 * 3;
+                   res.cookie("accessToken", updateToken, {
+                      
+                       expires: new Date(Date.now() + tokenExpiration), 
+                      
+                      
+                      
+                      
+                   });
+                
+              
+             
+              }
+              res.status(200).send("Account verified successfully.");
+            await UserVerificationToken.findByIdAndRemove(token._id);
+           
+        }catch(error){
+            res.status(500).json(error);
+        }
+    }
+
 exports.getAllUsers = async (req, res) => {
     try{
         const users = await User.find();
@@ -287,6 +375,7 @@ exports.getAllUsers = async (req, res) => {
         return res.status(500).json(err);
     }
 }
+
 
 
 

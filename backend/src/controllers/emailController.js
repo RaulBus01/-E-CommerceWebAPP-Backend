@@ -1,9 +1,19 @@
 const nodemailer = require('nodemailer');
 const formatDateTime = require('../utils/formatDate');
+const UserVerificationToken = require('../models/UserVerificationToken');
+const crypto = require('crypto');
 
-exports.verifyEmail = async(email, link) => {
+exports.verifyEmail = async(user) => {
     try{
+        const verificationToken = new UserVerificationToken({
+            userId: user._id,
+            token: crypto.randomBytes(16).toString('hex')
+        });
+        const savedVerificationToken = await verificationToken.save();
         
+        
+        const link = `http://localhost:3001/api/users/confirmAccount/${savedVerificationToken.token}`;
+
         let transporter = nodemailer.createTransport({
             service: "Gmail",
             auth:{
@@ -14,7 +24,7 @@ exports.verifyEmail = async(email, link) => {
        
         let info = await transporter.sendMail({
             from: process.env.USER,
-            to: email,
+            to: user.email,
             subject: "Email verification",
             text: "Welcome",
             html:`
