@@ -103,6 +103,7 @@ OrderSchema.pre('save', function(next) {
     if(!doc.isNew)
     {
         next();
+        return;
     }
     Counter.findByIdAndUpdate(
         { _id: 'orderNumber' },

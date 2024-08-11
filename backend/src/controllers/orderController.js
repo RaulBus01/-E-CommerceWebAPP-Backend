@@ -1,7 +1,7 @@
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const User = require('../models/User');
-const { confirmOrderEmail } = require('./emailController');
+const { confirmOrderEmail, orderStatusEmail } = require('./emailController');
 
 exports.createOrder = async (req, res) => {
     try {
@@ -116,8 +116,9 @@ exports.cancelOrder = async (req, res) => {
         }
         order.status = "Cancelled";
         await order.save();
-
         res.status(200).json({ message: "Order cancelled successfully" });
+        await orderStatusEmail(order.email, order, "Cancelled");
+        
     } catch (error) {
         res.status(500).json({ message: "An error occurred", error: error.message });
     }
@@ -149,6 +150,7 @@ exports.editOrderStatus = async (req, res) => {
         const updatedOrder = await order.save();
 
         res.status(200).json({ message: "Order status updated successfully", order: updatedOrder });
+        await orderStatusEmail(order.email, updatedOrder, req.body.status);
     } catch (error) {
         res.status(500).json({ message: "An error occurred", error: error.message });
     }

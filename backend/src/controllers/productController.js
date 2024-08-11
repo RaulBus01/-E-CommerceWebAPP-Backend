@@ -188,3 +188,23 @@ exports.getProductsByDistributor = async (req, res) => {
         res.status(500).json(err);
     }   
 }
+exports.searchProducts = async (req, res) => {
+    try {
+      console.log(req.query);
+        const searchQuery = req.query.q;
+        const products = await Product.find({
+            $or: [
+                { name: { $regex: searchQuery, $options: 'i' } },
+                { description: { $regex: searchQuery, $options: 'i' } },
+            ],
+        }).limit(7);
+        const categories = await Category.find({
+            name: { $regex: searchQuery, $options: 'i' },
+        });
+
+        res.status(200).json({ products, categories });
+        console.log(products, categories);
+    } catch (err) {
+        res.status(500).json(err);
+    }
+}

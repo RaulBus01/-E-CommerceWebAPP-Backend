@@ -78,3 +78,23 @@ exports.confirmOrderEmail = async(email, orders) => {
         console.log(error);
     }
 }
+exports.orderStatusEmail = async(email, order) => {
+    try{
+        let transporter = nodemailer.createTransport({
+            service: "Gmail",
+            auth:{
+                user: process.env.USER,
+                pass: process.env.PASSWORD,
+            },
+        });
+        let info = await transporter.sendMail({
+            from: process.env.USER,
+            to: email,
+            subject: "Order status",
+            text: `Your order with number ${order.orderNumber} has been updated to ${order.status}`,
+        });
+        console.log("order status email sent!", info);
+    }catch(error){
+        console.log(error);
+    }
+}
