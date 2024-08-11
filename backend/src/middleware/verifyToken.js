@@ -235,7 +235,7 @@ const verifyTokenAndReplyAuthorization = (req, res, next) => {
     verifyToken(req, res, async () => {
         try {
             const question = await Question.findById(req.body.questionId);
-            const product = await Product.findById(question.productId);
+            const product = await Product.findById(question.product);
             console.log(product);
             console.log(req.user.id);
             if (!question) {

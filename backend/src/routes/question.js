@@ -12,6 +12,6 @@ router.get("/findQuestion/:productId", questionController.getQuestionByProduct);
 //GET ALL QUESTIONS BY USER ID
 router.get("/findUserQuestion/:userId", verifyToken, questionController.getQuestionByUser);
 //GET ALL QUESTION BY DISTRIBUTOR ID
-//router.get("/findDistributorQuestion/:distributorId",verifyTokendAndAssociatedDistributor,questionController.getQuestionByDistributor);
+
 
 module.exports = router;
