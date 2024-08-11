@@ -2,10 +2,20 @@ const User = require("../../models/User");
 const CryptoJS = require("crypto-js");
 const Distributor = require("../../models/Distributor");
 const Customer = require("../../models/Customer");
+const Order = require("../../models/Order");
+const Product = require("../../models/Product");
+const Review = require("../../models/Review");
+const Question = require("../../models/Question");
+const Reply = require("../../models/Reply");
+const Cart = require("../../models/Cart");
+const Favourites = require("../../models/Favourites");
+const mongoose = require("mongoose");
+
+
 const jwt = require("jsonwebtoken");
 
 
-exports.updateUser = async (req, res) => {
+exports.updateUserSelf = async (req, res) => {
     const { id,password, confirm_password,...updateFields } = req.body;
     if (password || confirm_password) {
         if (!password || !confirm_password) {
@@ -17,110 +27,37 @@ exports.updateUser = async (req, res) => {
 
         updateFields.password = CryptoJS.AES.encrypt(password, process.env.PASS_SECRET).toString();
     }
-    if(updateFields.hasOwnProperty('isAuthorized') && req.user.role !== 'admin')
-    {
-        return res.status(400).json("You can't change the authorization status");
+    const restrictedFields = ['role', 'isAuthorized', 'isVerified'];
+    for (const field in updateFields) {
+        if (restrictedFields.includes(field)) {
+            return res.status(400).json(`You can't update ${field}`);
+        }
     }
-    if(updateFields.hasOwnProperty('isVerified') && req.user.role !== 'admin')
-    {
-        return res.status(400).json("You can't change the verification status");
-    }
-    if(updateFields.hasOwnProperty('role') && req.user.role !== 'admin')
-    {
-        return res.status(400).json("You can't change the role");
 
-    }
     if(updateFields.hasOwnProperty('phoneNumber') && updateFields.phoneNumber.length !== 10)
     {
         return res.status(400).json("Phone number must have 10 digits");
     }
     try {
-        console.log(req.user.id);
+        
         const user = await User.findById(id);
         if (!user) {
             return res.status(404).json("User not found");
         }
-
-        if(req.user.role === 'distributor')
+        if (user.role === 'customer')
         {
-            const distributor = await Distributor.findById(user._id);
-            if(!distributor){
-                return res.status(404).json("Distributor not found");
-            }
-            if(updateFields.hasOwnProperty('isAuthorized'))
-            {
-                return res.status(400).json("You can't change the authorization status");
-            }
-
-            await Distributor.findByIdAndUpdate(
-                distributor._id,
-                { $set: updateFields },
-                { new: true }
-            );
-
-        }
-        if(req.user.role === 'customer')
+            await Customer.findByIdAndUpdate(user._id, { $set: updateFields }, { new: true });
+        }else if(user.role === 'distributor')
         {
-            const customer = await Customer.findById(user._id);
-            if(!customer){
-                return res.status(404).json("Customer not found");
-            }
-            if(!customer.hasOwnProperty('address') && updateFields.address){
-               customer.address = {};
-            }
-            if(!customer.hasOwnProperty('payment') && updateFields.payment){
-                customer.payment = {};
-            }
-            
-       
-            await Customer.findByIdAndUpdate(
-                customer._id,
-                { $set: updateFields },
-                { new: true }   
-            );
-
-            
+            await Distributor.findByIdAndUpdate(user._id, { $set: updateFields }, { new: true });
         }
-        if(req.user.role === 'admin')
-        {
-            if(user.role === 'distributor')
-            {
-                const distributor = await Distributor.findById(user._id);
-                if(!distributor){
-                    return res.status(404).json("Distributor not found");
-                }
-            
-                await Distributor.findByIdAndUpdate(
-                    distributor._id,
-                    { $set: updateFields },
-                    { new: true }
-                );
-    
-            }
-            if (user.role ==='customer')
-            {
-                const customer = await Customer.findById(user._id);
-                if(!customer){
-                    return res.status(404).json("Customer not found");
-                }
-                await Customer.findByIdAndUpdate(
-                    customer._id,
-                    { $set: updateFields },
-                    { new: true }
-                );
-
-            }
-        }
-       
-
-        if(!user.phoneNumber && updateFields.phoneNumber){
-            user.phoneNumber ={};
-        }
+      
         const updatedUser = await User.findByIdAndUpdate(
             user._id, 
             { $set: updateFields }, 
             { new: true }
         ).populate('distributorInfo').populate('customerInfo');
+
         const updateToken = jwt.sign({ id: updatedUser._id,
              role: updatedUser.role, 
              email: updatedUser.email, 
@@ -151,40 +88,138 @@ exports.updateUser = async (req, res) => {
         res.status(500).json({ message: "Server error", error: err });
     }
 };
+exports.updateUserByAdmin = async (req, res) => {
+    const { id,password, confirm_password,...updateFields } = req.body;
+    if (password || confirm_password) {
+        if (!password || !confirm_password) {
+            return res.status(400).json("You have to enter both password and confirm password");
+        }
+        if (password !== confirm_password) {
+            return res.status(400).json("Passwords don't match");
+        }
 
-exports.deleteUser = async (req, res) => {
+        updateFields.password = CryptoJS.AES.encrypt(password, process.env.PASS_SECRET).toString();
+    }
+    if (updateFields.CUI && updateFields.CUI.length !== 6) {
+        return res.status(400).json("CUI must have 6 digits");
+    }
+
+    if (updateFields.phoneNumber && updateFields.phoneNumber.length !== 10) 
+    {
+        return res.status(400).json("Phone number must have 10 digits");
+    }
     try {
-
-        const user = await User.findById(req.body.id);
+        const user = await User.findById(id);
         if (!user) {
             return res.status(404).json("User not found");
         }
-        if(user.role === 'distributor')
+        if (user.role === 'customer')
         {
-            const distributor = await Distributor.findById(user._id);
-            if(!distributor){
-                return res.status(404).json("Distributor not found");
-            }
-            await Distributor.findByIdAndDelete(distributor._id);
-        }
-        if(user.role === 'customer')
+            await Customer.findByIdAndUpdate(user._id, { $set: updateFields }, { new: true });
+        }else if(user.role === 'distributor')
         {
-            const customer = await Customer.findById(user._id);
-            if(!customer){
-                return res.status(404).json("Customer not found");
-            }
-            await Customer.findByIdAndDelete(customer._id);
+            await Distributor.findByIdAndUpdate(user._id, { $set: updateFields }, { new: true });
         }
-        await User.findByIdAndDelete(user._id);
+
+        const updatedUser = await User.findByIdAndUpdate( user._id, { $set: updateFields }, { new: true }).populate('distributorInfo').populate('customerInfo');
+        const { password, ...others } = updatedUser._doc;
+        res.status(200).json({message: "User has been updated", user: others});
+    }catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Server error", error: err });
+    }
+
+}
+
+
+// exports.deleteUser = async (req, res) => {
+//     try {
+
+//         const user = await User.findById(req.body.id);
+//         if (!user) {
+//             return res.status(404).json("User not found");
+//         }
+//         if(user.role === 'distributor')
+//         {
+//             const distributor = await Distributor.findById(user._id);
+//             if(!distributor){
+//                 return res.status(404).json("Distributor not found");
+//             }
+//             await Distributor.findByIdAndDelete(distributor._id);
+//         }
+//         if(user.role === 'customer')
+//         {
+//             const customer = await Customer.findById(user._id);
+//             if(!customer){
+//                 return res.status(404).json("Customer not found");
+//             }
+//             await Customer.findByIdAndDelete(customer._id);
+//             await Order.deleteMany({user: user._id});
+
+//         }
+//         await User.findByIdAndDelete(user._id);
 
 
       
-        res.status(200).json("User has been deleted");
+//         res.status(200).json({ message: "User has been deleted" });
+//     }
+//     catch (err) {
+//         res.status(500).json(err);
+//     }
+// }
+
+
+exports.deleteUser = async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+        const userId = req.body.id;
+        const user = await User.findById(userId).session(session);
+        
+        if (!user) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(404).json("User not found");
+        }
+
+      
+        if (user.role === 'distributor') {
+            await Distributor.findByIdAndDelete(user._id).session(session);
+    
+            await Product.deleteMany({ distributor: user._id }).session(session);
+            await Cart.deleteMany({ 'products.distributor': user._id }).session(session);
+            await Favourites.deleteMany({ 'products.distributor': user._id }).session(session);
+            await Review.deleteMany({ 'product.distributor': user._id }).session(session);
+            await Order.deleteMany({ distributor: user._id }).session(session);
+
+        } else if (user.role === 'customer') {
+            await Customer.findByIdAndDelete(user._id).session(session);
+       
+            await Order.deleteMany({ user: user._id }).session(session);
+            await Review.deleteMany({ user: user._id }).session(session);
+            await Cart.deleteOne({ user: user._id }).session(session);
+            await Favourites.deleteOne({ user: user._id }).session(session);
+        }
+
+        
+        await Question.deleteMany({ user: user._id }).session(session);
+        await Reply.deleteMany({ user: user._id }).session(session);
+
+       
+        await User.findByIdAndDelete(user._id).session(session);
+
+        await session.commitTransaction();
+        session.endSession();
+
+        res.status(200).json({ message: "User and all associated data have been deleted" });
+    } catch (err) {
+        await session.abortTransaction();
+        session.endSession();
+        console.error('Error in deleteUser:', err);
+        res.status(500).json({ message: "An error occurred while deleting the user", error: err.message });
     }
-    catch (err) {
-        res.status(500).json(err);
-    }
-}
+};
 exports.getUser = async (req, res) => {
     try {
    

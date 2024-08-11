@@ -204,6 +204,7 @@ exports.getOrdersByUser = async(req, res) => {
         if (orders.length === 0) {
             return res.status(404).json({message:"No orders found"});
         }
+        console.log(orders);
         if (orders.length > 1) {
             orders.map(order =>{
                 const {name,role} = order.user._doc;

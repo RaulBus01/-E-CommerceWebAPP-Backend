@@ -6,9 +6,9 @@ const Customer = require("../models/Customer");
 
 const router = require("express").Router();
 //UPDATE USER
-router.put("/edit",verifyToken,userController.updateUser);
+router.put("/edit",verifyToken,userController.updateUserSelf);
 //UPDATE ADMIN
-router.put("/editByAdmin",verifyTokenAndAdmin,userController.updateUser);
+router.put("/editByAdmin",verifyTokenAndAdmin,userController.updateUserByAdmin);
 //DELETE
 router.delete("/delete",verifyTokenAndAdmin, userController.deleteUser);
 //GET USER
