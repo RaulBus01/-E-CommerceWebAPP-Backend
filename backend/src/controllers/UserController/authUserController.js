@@ -5,10 +5,13 @@ const Distributor = require('../../models/Distributor');
 const Customer = require('../../models/Customer');
 const Favourites = require('../../models/Favourites');
 const CryptoJS = require('crypto-js');
-const UserVerificationToken = require('../../models/UserVerificationToken');
-const crypto = require('crypto');
+
 const jwt = require('jsonwebtoken');
 const { verifyEmail } = require('../emailController');
+
+
+
+const tokenExpiration = 3 * 24 * 60 * 60 * 1000; // 3 days in milliseconds
 
 exports.registerUser = async (req, res) => {
     try {
@@ -28,7 +31,7 @@ exports.registerUser = async (req, res) => {
             phoneNumber: req.body.phoneNumber? req.body.phoneNumber : null,
         });
 
-        console.log(newUser);
+
        
         if(req.body.role === 'distributor'){
             
@@ -43,7 +46,7 @@ exports.registerUser = async (req, res) => {
                 return res.status(400).json({message: "Distributor not saved"});
             
             }
-            console.log(savedDistributor);
+       
 
             newUser.distributorInfo = savedDistributor._id;
         }
@@ -59,7 +62,7 @@ exports.registerUser = async (req, res) => {
             newUser.customerInfo = savedCustomer._id;
         }
         
-        console.log(newUser);
+    
         const user = await newUser.save();
         if(!user){
             return res.status(400).json({message: "User not saved"});
@@ -85,19 +88,35 @@ exports.registerUser = async (req, res) => {
         }
 
       
-        const verificationToken = new UserVerificationToken({
-            userId: user._id,
-            token: crypto.randomBytes(16).toString('hex')
-        });
-        const savedVerificationToken = await verificationToken.save();
-        
-        
-        const link = `http://localhost:3001/api/users/confirmAccount/${savedVerificationToken.token}`;
+       
         const {password, ...others} = user._doc;
-      
+        const accessToken = jwt.sign(
+            { 
+                id: user.id,
+                role: user.role,
+                email: user.email,
+                name: user.name,
+                customerInfo: user.customerInfo,
+                distributorInfo: user.distributorInfo,
+                createdAt: user.createdAt,
+                updatedAt: user.updatedAt,
+              
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: "3d" }
+        );
+        console.log(user);
+        res.cookie("accessToken", accessToken, {
+           
+            expires: new Date(Date.now() + tokenExpiration), 
+         
+           
+           
+           
+        });
         if(user.role ==='customer')
         {
-            await verifyEmail(user.email, link);
+            await verifyEmail(user);
             
            
                 
@@ -131,7 +150,6 @@ exports.registerUser = async (req, res) => {
         res.status(500).json(err);
     }
 }
-const tokenExpiration = 3 * 24 * 60 * 60 * 1000; // 3 days in milliseconds
 exports.loginUser =  async (req, res) => {
 
     try {

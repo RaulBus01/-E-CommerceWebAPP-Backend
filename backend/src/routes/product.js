@@ -17,6 +17,8 @@ router.get("/findAll", productController.getAllProducts);
 router.get("/findCategory/:category", productController.getProductsByCategory);
 //GET PRODUCTS BY DISTRIBUTOR
 router.get("/findDistributor/:id", verifyTokenAndDistributor, productController.getProductsByDistributor);
+//SEARCH PRODUCTS
+router.get("/search", productController.searchProducts);
 //GET FILTERED PRODUCTS
 router.post("/findFilter", productController.filterProducts);
 

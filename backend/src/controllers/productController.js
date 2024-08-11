@@ -4,6 +4,11 @@ const Product = require('../models/Product');
 exports.createProduct = async (req, res) => {
     try {
       const imageFiles = req.files;
+      if(req.body.categories === ',' || req.body.categories === '')
+      {
+          return res.status(400).json("Categories must be provided");
+      }
+
       const categoryArray = req.body.categories.split(',');
    
   
@@ -34,6 +39,7 @@ exports.createProduct = async (req, res) => {
         price: req.body.price,
         categories: categoryArray,
         description: req.body.description,
+        brand: req.body.brand,
         stock: req.body.stock,
         distributor: req.user.id,
       });
@@ -45,10 +51,10 @@ exports.createProduct = async (req, res) => {
     
 
       
-      savedProduct.image = imageUrls;
+      savedProduct.images = imageUrls;
       await savedProduct.save();
     
-      res.status(200).json(savedProduct);
+      res.status(200).json({ message: 'Product added successfully', product: savedProduct });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
@@ -75,6 +81,10 @@ exports.createProduct = async (req, res) => {
       }
   
       const { name, description, price, stock, categories } = req.body;
+      if(req.body.categories === ',' || req.body.categories === '')
+        {
+            return res.status(400).json("Categories must be provided");
+        }
       const categoryArray = categories.split(',');
   
       categoryArray.forEach(async (category) => {
@@ -84,24 +94,41 @@ exports.createProduct = async (req, res) => {
         }
       });
   
-      let imageUrls = product.image;
-      if (req.files && req.files.images) {
-        const imageFiles = Array.isArray(req.files.images) ? req.files.images : [req.files.images];
-        imageUrls = imageFiles.map((file) => {
-          return `${process.env.BASE_URL}/api/uploads/${file.filename}`;
-        });
+      const imageFiles = req.files;
+      let imageUrls = req.body.images || [];
+
+      // Convert new image files to URLs
+      if (imageFiles && imageFiles.length > 0) {
+        const newImageUrls = imageFiles.map((file) => `${process.env.BASE_URL}/api/uploads/${file.filename}`);
+        // Merge existing image URLs with new image URLs
+        imageUrls = [...imageUrls, ...newImageUrls];
       }
-  
+      
+
+
+      
+
+
+
+    
+
+     
+      
+
+     
+
+      
       product.name = name || product.name;
       product.price = price || product.price;
       product.categories = categoryArray || product.categories;
       product.description = description || product.description;
       product.stock = stock || product.stock;
-      product.image = imageUrls;
+      product.images = imageUrls;
+      product.brand = req.body.brand || product.brand;
       product.isActive = req.body.isActive || product.isActive;
   
       const savedProduct = await product.save();
-      res.status(200).json(savedProduct);
+      res.status(200).json({ message: 'Product updated successfully', product: savedProduct });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
@@ -112,7 +139,7 @@ exports.deleteProduct = async (req, res) => {
             await Product.findByIdAndUpdate(req.params.productId, {
                 isActive: false,
             });
-            res.status(200).json("Product has been deleted");
+            res.status(200).json({ message: 'Product deleted successfully' });
         } catch (err) {
             res.status(500).json(err);  
     }
@@ -120,7 +147,7 @@ exports.deleteProduct = async (req, res) => {
 exports.getAllProducts = async (req, res) => {
     try {
         const products = await Product.find().populate("reviews", "content title rating createdAt").populate("questions").populate("distributor", "name ");
-        res.status(200).json(products);
+        res.status(200).json({message: 'All products', products});
     } catch (err) {
         res.status(500).json(err);
     }
@@ -136,7 +163,7 @@ exports.getProduct = async (req, res) => {
         return res.status(404).json({ message: 'Product not found' });
       }
     
-        res.status(200).json(product);
+        res.status(200).json({ message: 'Product found', product });
     } catch (err) {
       res.status(500).json({ message: 'Error fetching product', error: err.message });
     }
@@ -151,7 +178,7 @@ exports.getProductsByCategory = async (req, res) => {
 
         res.status(200).json(products);
     } catch (err) {
-        res.status(500).json(err);
+        res.status(500).json({ message: 'Error fetching products', error: err.message });
     }
 }
 
@@ -179,10 +206,32 @@ exports.getProductsByDistributor = async (req, res) => {
              return product.distributor._id.toString() === userId
        
         });
-        res.status(200).json(filteredProducts);
+
+        console.log(filteredProducts);
+
+        res.status(200).json({ message: 'Products found', products: filteredProducts });
     } catch (err) {
         res.status(500).json(err);
     }   
+}
+exports.searchProducts = async (req, res) => {
+    try {
+      console.log(req.query);
+        const searchQuery = req.query.q;
+        const products = await Product.find({
+            $or: [
+                { name: { $regex: searchQuery, $options: 'i' } },
+                { description: { $regex: searchQuery, $options: 'i' } },
+            ],
+        }).limit(7);
+        const categories = await Category.find({
+            name: { $regex: searchQuery, $options: 'i' },
+        }).limit(5);
+
+        res.status(200).json({ products, categories });
+    } catch (err) {
+        res.status(500).json(err);
+    }
 }
 
 exports.filterProducts = async (req, res) => {
