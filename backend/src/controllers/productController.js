@@ -5,7 +5,6 @@ exports.createProduct = async (req, res) => {
     try {
       const imageFiles = req.files;
       const categoryArray = req.body.categories.split(',');
-      console.log(req.body);
    
   
       if (!imageFiles || imageFiles.length === 0) {
@@ -57,7 +56,6 @@ exports.createProduct = async (req, res) => {
   exports.updateProduct = async (req, res) => {
     try {
       const product = await Product.findById(req.params.productId);
-      console.log(req.body);
       if (!product) {
         return res.status(404).json({ message: 'Product not found' });
       }
@@ -77,7 +75,6 @@ exports.createProduct = async (req, res) => {
       }
   
       const { name, description, price, stock, categories } = req.body;
-      console.log(categories);
       const categoryArray = categories.split(',');
   
       categoryArray.forEach(async (category) => {
@@ -144,18 +141,20 @@ exports.getProduct = async (req, res) => {
       res.status(500).json({ message: 'Error fetching product', error: err.message });
     }
   };
+  
 exports.getProductsByCategory = async (req, res) => {
     try {
-        const products = await Product.find({
-            category: {
-                $in: [req.params.category],
-            },
-        });
+      const category = await Category.findOne({ name: req.params.category });
+      const products = await Product.find({
+        categories: category._id,
+      });
+
         res.status(200).json(products);
     } catch (err) {
         res.status(500).json(err);
     }
 }
+
 
 exports.getProductsByDistributor = async (req, res) => {
     try {
@@ -180,11 +179,36 @@ exports.getProductsByDistributor = async (req, res) => {
              return product.distributor._id.toString() === userId
        
         });
-
-        console.log(filteredProducts);
-
         res.status(200).json(filteredProducts);
     } catch (err) {
         res.status(500).json(err);
     }   
+}
+
+exports.filterProducts = async (req, res) => {
+    try {
+        const { price, brand, availability, category } = req.body;
+        const fetchedCategory = await Category.findOne({ name: category });
+        let products = await Product.find({
+        categories: fetchedCategory._id,
+      });
+        if (price.length) {
+            products = products.filter((product) => {
+              return product.price >= price[0] && product.price <= price[1];
+            });
+        }
+        if (brand.length) {
+            products = products.filter((product) => brand.includes(product.brand));
+        }
+        if (availability) {
+            if(availability.inStock && !availability.outOfStock){
+              products = products.filter((product) => product.stock > 0);
+            }else if( !availability.inStock && availability.outOfStock){
+              products = products.filter((product) => product.stock <= 0);
+            }
+        }
+        res.status(200).json(products);
+    } catch (err) {
+        res.status(500).json(err);
+    }
 }

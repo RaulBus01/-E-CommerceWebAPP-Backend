@@ -17,5 +17,7 @@ router.get("/findAll", productController.getAllProducts);
 router.get("/findCategory/:category", productController.getProductsByCategory);
 //GET PRODUCTS BY DISTRIBUTOR
 router.get("/findDistributor/:id", verifyTokenAndDistributor, productController.getProductsByDistributor);
+//GET FILTERED PRODUCTS
+router.post("/findFilter", productController.filterProducts);
 
 module.exports = router;    
