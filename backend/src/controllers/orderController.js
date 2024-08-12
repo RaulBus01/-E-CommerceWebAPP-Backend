@@ -33,8 +33,12 @@ exports.createOrder = async (req, res) => {
           return res.status(400).json(`Product out of stock: ${product.productId}`);
         }
   
-        const { price, distributor } = checkProduct;
-        totalPrice += price * product.quantity;
+        const { price, discountPrice, distributor } = checkProduct;
+        if(discountPrice && discountPrice < price){
+            totalPrice += discountPrice * product.quantity;
+        } else {
+            totalPrice += price * product.quantity;
+        }
   
         if (!ordersByDistributor.has(distributor)) {
           ordersByDistributor.set(distributor, {
@@ -47,7 +51,11 @@ exports.createOrder = async (req, res) => {
           product: checkProduct._id,
           quantity: product.quantity
         });
-        ordersByDistributor.get(distributor).totalPrice += price * product.quantity;
+        if(discountPrice && discountPrice < price){
+            ordersByDistributor.get(distributor).totalPrice += discountPrice * product.quantity;
+        } else {
+            ordersByDistributor.get(distributor).totalPrice += price * product.quantity;
+        }
       }
   
       const orders = [];
