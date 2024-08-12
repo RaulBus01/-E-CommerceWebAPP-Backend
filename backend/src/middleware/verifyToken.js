@@ -247,13 +247,7 @@ const verifyTokenAndReplyAuthorization = (req, res, next) => {
             if (req.user.role === 'admin' || req.user.role === 'customer' || req.user.id === product.distributor.toString()) {
                 return next();
             }
-            // if (req.user.role === "distributor") {
-            //     const product = await Product.findById(question.productId);
-                
-            //     if (product.distributorId === req.user.id) {
-            //         return next();
-            //     }
-            // }
+
             res.status(403).json("You are not authorized to reply to this question");
         } catch (err) {
             res.status(500).json({ error: err.message });

@@ -50,7 +50,7 @@ exports.deleteQuestion = async (req, res) => {
 }
 exports.getQuestionByProduct = async (req, res) => {
     try { 
-        const questions = await Question.find({ productId: req.params.productId })
+        const questions = await Question.find({ product: req.params.productId })
             .populate({path: 'replies', populate: {path: 'user', select: 'name role'}}).populate('user', 'name role');
         if(!questions){
             return res.status(404).json({ message: 'No questions found for this product' });
