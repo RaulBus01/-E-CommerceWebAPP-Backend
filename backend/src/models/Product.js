@@ -9,6 +9,14 @@ const productSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
+    discountPrice: {
+        type: Number,
+        default: 0,
+    },
+    discountPercentage: {
+        type: Number,
+        default: 0,
+    },
     brand: {
         type: String,
         required: true,
@@ -62,6 +70,13 @@ productSchema.virtual('reviews',{
     ref: 'Review',
     localField: '_id',
     foreignField: 'product'
+});
+
+productSchema.virtual('calculatedDiscountPercentage').get(function() {
+    if (this.price && this.discountPrice && this.discountPrice < this.price) {
+        return ((this.price - this.discountPrice) / this.price) * 100;
+    }
+    return 0;
 });
 
 productSchema.set('toObject', { virtuals: true });

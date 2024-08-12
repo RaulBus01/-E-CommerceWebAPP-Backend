@@ -34,9 +34,14 @@ exports.createProduct = async (req, res) => {
         }
     } );  
     
+    const discountPrice = req.body.discountPrice || req.body.price;
+    const discountPercentage = req.body.discountPercentage || 0;
+
     const newProduct = new Product({
         name: req.body.name,
         price: req.body.price,
+        discountPrice: discountPrice,
+        discountPercentage: discountPercentage,
         categories: categoryArray,
         description: req.body.description,
         brand: req.body.brand,
@@ -104,20 +109,6 @@ exports.createProduct = async (req, res) => {
         imageUrls = [...imageUrls, ...newImageUrls];
       }
       
-
-
-      
-
-
-
-    
-
-     
-      
-
-     
-
-      
       product.name = name || product.name;
       product.price = price || product.price;
       product.categories = categoryArray || product.categories;
@@ -126,6 +117,8 @@ exports.createProduct = async (req, res) => {
       product.images = imageUrls;
       product.brand = req.body.brand || product.brand;
       product.isActive = req.body.isActive || product.isActive;
+      product.discountPrice = req.body.discountPrice || product.price;
+      product.discountPercentage = req.body.discountPercentage || product.discountPercentage;
   
       const savedProduct = await product.save();
       res.status(200).json({ message: 'Product updated successfully', product: savedProduct });
