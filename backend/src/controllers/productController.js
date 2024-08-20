@@ -101,6 +101,7 @@ exports.createProduct = async (req, res) => {
   
       const imageFiles = req.files;
       let imageUrls = req.body.images || [];
+      console.log (imageUrls)
 
       // Convert new image files to URLs
       if (imageFiles && imageFiles.length > 0) {

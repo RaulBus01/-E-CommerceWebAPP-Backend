@@ -59,6 +59,7 @@ exports.updateUserSelf = async (req, res) => {
             { $set: updateFields }, 
             { new: true }
         ).populate('distributorInfo').populate('customerInfo');
+        console.log(updatedUser);
 
         const updateToken = jwt.sign({ id: updatedUser._id,
              role: updatedUser.role, 
