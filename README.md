@@ -25,7 +25,7 @@ The **E-Commerce Web Application - Backend** is a robust backend service designe
 
 ### Prerequisites
 
-- **Node.js** (version X.X.X or higher)
+- **Node.js** (version 20.11.1 or higher)
 - **MongoDB** (locally installed or cloud-based service like MongoDB Atlas)
 
 ### Installation
